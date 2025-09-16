@@ -45,7 +45,7 @@ def is_connected(url: Optional[str] = None):
     try:
         with urlopen(url) as rep:
             return rep.status == 200
-    except:
+    except Exception:
         ...
 
 
