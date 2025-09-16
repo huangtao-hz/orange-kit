@@ -12,6 +12,7 @@ from docx.oxml.ns import qn
 from docx.shared import Pt
 
 from orange import Path, datetime, now, wlen
+from typing import Union
 
 from .utils.hz import Ordinal
 
@@ -43,9 +44,7 @@ class Document:
         zw.paragraph_format.line_spacing = 1.5
         # zw.keep_together = False
 
-        gwbt = self.document.styles.add_style(
-            "公文标题", WD_STYLE_TYPE.PARAGRAPH
-        )
+        gwbt = self.document.styles.add_style("公文标题", WD_STYLE_TYPE.PARAGRAPH)
         gwbt.font.size = Pt(22)
         gwbt.font.name = "方正小标宋简体"
         gwbt._element.rPr.rFonts.set(qn("w:eastAsia"), "方正小标宋简体")
@@ -79,9 +78,9 @@ class Document:
         zw.paragraph_format.space_after = Pt(0)
         zw.paragraph_format.line_spacing = 1
 
-    def save(self, path: str):
+    def save(self, path: Union[str, Path]):
         "保存到磁盘文件"
-        self.document.save(Path(path))
+        self.document.save(str(path))
 
     def add_title(self, title: str):
         "添加标题"
