@@ -1,5 +1,6 @@
-from orange.utils.sqlite import connect
-from orange.utils.table import Column, Table
+"""
+from orange.sqlite import connect
+from orange.table import Column, Table
 
 
 class Test(Table):
@@ -9,4 +10,13 @@ class Test(Table):
 
 db=connect(':memory:')
 
-Test.create_table(db)
+#Test.create_table(db)
+"""
+
+from os import open
+
+
+def hello():
+    with open("a.txt") as f:
+        f.write("hello")
+        print("hello world.")
