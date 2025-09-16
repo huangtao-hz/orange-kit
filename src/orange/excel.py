@@ -81,7 +81,6 @@ def read_excel(
     skiprows: int = 0,  # 跳过行
     nrows: int = 0,  # 读取行数
 ) -> Iterable:
-    print(io,sheets)
     if isinstance(io, (str, Path)):
         with open_workbook(Path(io)) as book:
             return read_excel(book, sheets, usecols, converter, skiprows, nrows)
