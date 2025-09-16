@@ -286,9 +286,7 @@ class Path(_Parent):
                 yield from f
 
         filter = filter or _filter
-        data = csv.reader(
-            reader() if encoding else self.lines, dialect=dialect, **kw
-        )
+        data = csv.reader(reader() if encoding else self.lines, dialect=dialect, **kw)
         if any([columns, pipelines, filter, rows, converter]):
             data = Data(
                 data,
@@ -343,9 +341,7 @@ class Path(_Parent):
             with tarfile.open(str(self), "r") as f:
                 members = conv_members(members, "/")
                 members = (
-                    tuple(map(f.getmember, members))
-                    if members
-                    else f.getmembers()
+                    tuple(map(f.getmember, members)) if members else f.getmembers()
                 )
                 f.extractall(path, members)
         elif name.endswith(".zip"):
@@ -355,9 +351,9 @@ class Path(_Parent):
                 members = conv_members(members, "/")
                 for fileinfo in f.filelist:
                     if not (fileinfo.flag_bits & 0x0800):
-                        fileinfo.filename = fileinfo.filename.encode(
-                            "cp437"
-                        ).decode("gbk")
+                        fileinfo.filename = fileinfo.filename.encode("cp437").decode(
+                            "gbk"
+                        )
                         f.NameToInfo[fileinfo.filename] = fileinfo
                 f.extractall(path, members)
 
@@ -615,14 +611,10 @@ class Path(_Parent):
         if columns:
             pipelines.append(includer(*columns))
         pipelines.append(
-            mapper(
-                lambda row: [x.decode(encoding, errors).strip() for x in row]
-            )
+            mapper(lambda row: [x.decode(encoding, errors).strip() for x in row])
         )
         if quote:
-            pipelines.append(
-                mapper(lambda row: [unquote(x, quote) for x in row])
-            )
+            pipelines.append(mapper(lambda row: [unquote(x, quote) for x in row]))
         return Data(data, *pipelines, *args, **kwargs)
 
     def rar(self, dest: str, passwd=None):
@@ -687,15 +679,11 @@ def repare_filename(pathes):
             path.repare_name()
 
 
-@command(
-    description="对下载的音乐进行转换，并加入 iTunes 音乐库", allow_empty=True
-)
+@command(description="对下载的音乐进行转换，并加入 iTunes 音乐库", allow_empty=True)
 @arg("path", default="~/Downloads", help="音乐文件目录")
 def add_music_lib(path=None):
     src = Path(path or "~/Downloads")
-    dest = (
-        HOME / "Music/iTunes/iTunes Media/Automatically Add to iTunes.localized"
-    )
+    dest = HOME / "Music/iTunes/iTunes Media/Automatically Add to iTunes.localized"
     for path in src.iterdir():
         if path.lsuffix in (".flac", ".ape", ".mp3", ".m4a", ".wav"):
             path.music_tag.fixtags()

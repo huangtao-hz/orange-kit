@@ -16,7 +16,8 @@ from .shell import Path
 
 
 class Config(object):
-    '一个简单的程序配置库，采用 toml 格式 '
+    "一个简单的程序配置库，采用 toml 格式"
+
     def __init__(self, prog: str = ""):
         if not prog:
             prog = Path(sys.argv[0]).pname or "test"
@@ -25,12 +26,14 @@ class Config(object):
             self.path = Path(f"$localappdata/{prog}/{prog}.toml")
         else:
             self.path = Path(f"~/.config/{prog}/{prog}.toml")
-
-        self.path.parent.ensure(True)
+        try:
+            self.path.parent.ensure(True)
+        except Exception:
+            ...
         self.config = load(self.path) if self.path else {}
 
     def get(self, key: str, default: Any = None) -> Any:
-        '获取参数配置，如系统未配置，这返回并保存默认值'
+        "获取参数配置，如系统未配置，这返回并保存默认值"
         d = self.config.copy()
         for k in key.split("."):
             d = d.get(k, None)
@@ -41,7 +44,7 @@ class Config(object):
         return d
 
     def set(self, key: str, value: Any):
-        '保存参数配置，一般由 get 自动使用'
+        "保存参数配置，一般由 get 自动使用"
         d = self.config
         keys = list(key.split("."))
         for k in keys[:-1]:
@@ -53,6 +56,6 @@ class Config(object):
         self.save()
 
     def save(self):
-        '保存参数配置到配置文件，一般由系统自动调用'
+        "保存参数配置到配置文件，一般由系统自动调用"
         with self.path.open("w", encoding="utf8") as f:
             dump(self.config, f)
