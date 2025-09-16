@@ -1,17 +1,14 @@
-from orange.sqlite import connect
-from orange.table import Column, Table
+from orange import Path
 
 
-class Test(Table):
-    tablename = "test"
-    name = Column("姓名", _type="text", is_pk=True)
-    bj = Column("班级", _type="text", has_index=True)
+def conv(row:list)->list:
+    row=list(row)
+    row[0]=row[0]+'hello'
+    if row[0]<'8100':
+        return row
 
-
-db = connect(":memory:")
-
-Test.create_table(db)
-
-with db:
-    db.execute("insert into test values(?,?)", ["abc", "one"])
-    db.print("select * from test")
+path=Path('~/Documents').find('*新柜面存量交易迁移*.xls?')
+print(path)
+if path:
+    data=path.read_sheet(sheet='全量表',start_row=1)
+    print(*data,sep='\n')

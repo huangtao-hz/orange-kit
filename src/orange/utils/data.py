@@ -194,12 +194,15 @@ class Data:
 
     columns = include
 
-    def __iter__(self):
+    def __iter__(self)->Iterable:
         if self._rows:
             self._data = split(self._data, self._rows)
         elif self._limit:
             self._data = limit(self._data, self._limit)
         return self._data
+
+    def __next__(self):
+        ...
 
     def split(self, count=10000):
         self._rows = count
@@ -213,7 +216,7 @@ class Data:
         from collections import defaultdict
 
         data = defaultdict(lambda: [])
-        for row in self:
+        for row in self._data:
             data[key[row]].append(row)
         return data.items()
 

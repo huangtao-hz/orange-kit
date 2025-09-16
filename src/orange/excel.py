@@ -57,14 +57,15 @@ def proc_data(
     "对数据进行整理"
     if skiprows:
         data = data[skiprows:]
+    rdata=iter(data)
     if usecols:
-        data = map(itemgetter(*IterCols(usecols)), data)
+        rdata = map(itemgetter(*IterCols(usecols)), rdata)
     if converter:
-        data = filter(None, map(converter, data))
+        rdata = filter(None, map(converter, rdata))
     if nrows:
-        return (d for i, d in zip(range(nrows), data))
+        return (d for i, d in zip(range(nrows), rdata))
     else:
-        return data
+        return rdata
 
 
 def conv(row):
@@ -80,6 +81,7 @@ def read_excel(
     skiprows: int = 0,  # 跳过行
     nrows: int = 0,  # 读取行数
 ) -> Iterable:
+    print(io,sheets)
     if isinstance(io, (str, Path)):
         with open_workbook(Path(io)) as book:
             return read_excel(book, sheets, usecols, converter, skiprows, nrows)
@@ -88,31 +90,25 @@ def read_excel(
             sheet = io.sheet_by_index(sheets)
             data = sheet._cell_values
             return proc_data(data, usecols, converter, skiprows, nrows)
-    elif isinstance(sheets, int):
-        sheet = io.sheet_by_name(sheets)
-        return proc_data(
-            sheet._cell_values, usecols, converter, skiprows, nrows
-        )
-    elif isinstance(sheets, Iterable):
-        return chain(
-            *(
-                read_excel(sheet, usecols, converter, skiprows, nrows)
-                for sheet in sheets
+        elif isinstance(sheets, str):
+            sheet = io.sheet_by_name(sheets)
+            data=sheet._cell_values
+            return proc_data(
+                data, usecols, converter, skiprows, nrows
             )
-        )
-    elif sheets is None:
-        return chain(
-            *(
-                proc_data(
-                    sheet._cell_values, usecols, converter, skiprows, nrows
+        elif isinstance(sheets, Iterable):
+            return chain(
+                *(
+                    read_excel(io,sheet, usecols, converter, skiprows, nrows)
+                    for sheet in sheets
                 )
-                for sheet in io.sheets()
             )
-        )
-
-
-if __name__ == "__main__":
-    path = Path("~/Downloads").find("test*")
-    if path:
-        data = read_excel(path, sheets=0, converter=conv)
-        print(*data, sep="\n")
+        elif sheets is None:
+            return chain(
+                *(
+                    proc_data(
+                        sheet._cell_values, usecols, converter, skiprows, nrows
+                    )
+                    for sheet in io.sheets()
+                )
+            )

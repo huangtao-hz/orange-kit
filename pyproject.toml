@@ -18,7 +18,7 @@ dynamic = ["version"]
 [project.scripts]
 cleanwork = "orange.shell.path:clean_trash"
 gclone = "orange.tools.gclone:proc"
-mconf = "orange.mail:config_mail" # 配置邮箱服务器
+mconf = "orange.mail:config_mail"  # 配置邮箱服务器
 pack = "orange.tools.pack:main"
 pkg = "orange.pykit.pypkgs:main"
 pyclean = "orange.pykit.pysetup:pyclean"

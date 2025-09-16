@@ -27,7 +27,7 @@ import sys
 from codecs import BOM_BE, BOM_LE, BOM_UTF8
 from contextlib import contextmanager, suppress
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import Optional
+from typing import Iterable, Optional, Union
 
 from packaging.version import Version
 
@@ -232,12 +232,13 @@ class Path(_Parent):
         with xlrd.open_workbook(filename=str(self)) as book:
             return book.sheets()
 
-    def sheets(self, index=None, *pipelines, header=None):
+    def sheets(self, index:Union[int,str,None]=None, *pipelines, header=None)->Iterable:
         """提供读取指定worksheet的功能，其中index可以为序号，
         也可以为表的名称。"""
         import xlrd3 as xlrd
 
         book = xlrd.open_workbook(filename=str(self))
+        sheet=None
         if isinstance(index, int):
             sheet = book.sheet_by_index(index)
         elif isinstance(index, str):
@@ -247,6 +248,7 @@ class Path(_Parent):
             if pipelines or header:
                 data = Data(data, *pipelines, header=header)
             return data
+        return tuple()
 
     def iter_sheets(self):
         """如果指定的文件为excel文件，则可以迭代读取本文件的数据。
@@ -334,7 +336,7 @@ class Path(_Parent):
             members = conv_members(members, "/" if POSIX else "\\")
             members = " ".join(members) if members else ""
             cmd = f"unrar x -p{password}" if password else "unrar x"
-            sh > f"{cmd} {self} {members} {path}"
+            sh >f"{cmd} {self} {members} {path}"
         elif any(map(name.endswith, (".tar.gz", ".tgz", ".gz"))):
             import tarfile
 
@@ -365,19 +367,6 @@ class Path(_Parent):
         _path.ensure()
         for path in self:
             path.rar(_path, passwd=passwd)
-
-    def zip(self, zipfilename: str) -> None:
-        """
-        把当前文件或目录内所有的文件压缩成 zip文件
-        """
-        import zipfile
-
-        with zipfile.ZipFile(zipfilename, "w", zipfile.ZIP_DEFLATED, 5) as z:
-            if self.is_dir():  # 如为目录则打包整个文件夹
-                for file in self.rglob("*.*"):
-                    z.write(file, file - self)
-            else:  # 如为文件则只打包当前文件
-                z.write(self, self.name)
 
     @property
     def lsuffix(self) -> str:
@@ -550,7 +539,7 @@ class Path(_Parent):
             print(self.name, "->", name)
             self.rename(self.with_name(name))
 
-    def read_sheet(self, *args, sheet: str = "", start_row: int = 0, **kwargs):
+    def read_sheet(self, *args, sheet: Union[str, int, list, None] = None, start_row: int = 0, **kwargs)->Iterable:
         """
         读取 Excel 文件
         其中，*args,**kwargs 为 Data 类的参数
@@ -558,10 +547,11 @@ class Path(_Parent):
         start_row:单元格的起始行
         """
         assert self.lsuffix.startswith(".xls")
-        from .excel import WorkBook
-
-        data = WorkBook(self).read_sheet(sheet, start_row=start_row)
-        yield from Data(data, *args, **kwargs)
+        from orange.excel import read_excel
+        data=read_excel(self,sheet,skiprows=start_row)
+        if args or kwargs:
+            data=Data(data,*args,**kwargs)
+        return data
 
     def read_data(
         self,
