@@ -1,7 +1,9 @@
+from typing import Optional
+
 from orange import Path
 
 
-def conv(row:list)->list:
+def conv(row:list)->Optional[list]:
     row=list(row)
     row[0]=row[0]+'hello'
     if row[0]<'8100':

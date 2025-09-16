@@ -11,7 +11,7 @@
 """
 
 from operator import itemgetter
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Iterator
 
 from .htutil import get_md5, limit, split, tprint
 
@@ -194,15 +194,12 @@ class Data:
 
     columns = include
 
-    def __iter__(self)->Iterable:
+    def __iter__(self)->Iterator:
         if self._rows:
             self._data = split(self._data, self._rows)
         elif self._limit:
             self._data = limit(self._data, self._limit)
-        return self._data
-
-    def __next__(self):
-        ...
+        return iter(self._data)
 
     def split(self, count=10000):
         self._rows = count
@@ -212,13 +209,13 @@ class Data:
             self._data, format_spec=format_spec, sep=sep, print_rows=print_rows
         )
 
-    def groupby(self, key: Callable) -> Iterable:
+    def groupby(self, key: Callable) -> dict:
         from collections import defaultdict
 
         data = defaultdict(lambda: [])
         for row in self._data:
-            data[key[row]].append(row)
-        return data.items()
+            data[key(row)].append(row)
+        return data
 
     def show(self, limit=5):
         "打印指定行的数据"
