@@ -15,7 +15,7 @@ from orange.shell import (
     is_dev,
     is_installed,
 )
-from orange.sqlite import LoadError, connect
+from orange.sqlite import LoadError, connect, Connection
 from orange.utils import (
     LOCAL,
     LTZ,
@@ -132,6 +132,7 @@ __all__ = (
     "verbose",
     "arg",
     "command",
+    "Connection",
     "generator",
     "version",
     "extract",
