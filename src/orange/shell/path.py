@@ -548,7 +548,7 @@ class Path(_Parent):
         """
         assert self.lsuffix.startswith(".xls")
         from orange.excel import read_excel
-        data=read_excel(self,sheet,skiprows=start_row)
+        data=read_excel(self,sheets=sheet,skiprows=start_row)
         if args or kwargs:
             data=Data(data,*args,**kwargs)
         return data
