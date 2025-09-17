@@ -69,7 +69,7 @@ def proc_data(
 
 
 def read_excel(
-    io: Union[str, Path, bytes, Book, None] = None,  # Excel 文件
+    io: Union[str, Path, Book, None] = None,  # Excel 文件
     file_contents: Optional[bytes] = None,  # 文件内容
     sheets: Union[str, int, list, None] = None,  # 工作表名
     usecols: str = "",  # 选取列

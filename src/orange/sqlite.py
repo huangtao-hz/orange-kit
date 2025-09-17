@@ -41,7 +41,7 @@ def fix_db_name(database: Union[str, Path]) -> str:
 
 class LoadError(Exception):
     def __init__(self, path: Union[str, Path]):
-        self.path =path
+        self.path = path
 
     def __str__(self):
         return f"{self.path} 已导入"
@@ -180,6 +180,8 @@ class Connection(sqlite3.Connection):
             )
         self.execute(doneSQL, [name, str(path), mtime, ver])
 
+    loadcheck = lcheck
+
     def load(
         self,
         table: str,
@@ -220,8 +222,8 @@ class Connection(sqlite3.Connection):
     def update(
         self,
         table: str,
-        keys: Union[str,Iterable[str]],
-        values: Union[str,Iterable[str]],
+        keys: Union[str, Iterable[str]],
+        values: Union[str, Iterable[str]],
         data: Iterable,
         print_result: bool = False,
     ) -> int:
@@ -234,7 +236,7 @@ class Connection(sqlite3.Connection):
         print_result: 打印更新的数量
         """
 
-        def conv(fields: Union[str,Iterable[str]]) -> Iterable[str]:
+        def conv(fields: Union[str, Iterable[str]]) -> Iterable[str]:
             if isinstance(fields, str):
                 _fields = fields.split(",")
                 if _fields:
@@ -254,7 +256,7 @@ class Connection(sqlite3.Connection):
             print(f"更新数据：{count:,d} 条")
         return count
 
-    def tran(self, func:Callable):
+    def tran(self, func: Callable):
         """装饰器，将一下函数里所有的操作封装成一个事务。使用方法如下：
         @db.tran
         def abc():
@@ -271,4 +273,5 @@ class Connection(sqlite3.Connection):
 
 
 def connect(db: Union[str, Path], **kw) -> Connection:
+    "连接数据库"
     return Connection(db, **kw)
