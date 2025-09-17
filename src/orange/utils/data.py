@@ -158,11 +158,7 @@ class Data:
                 self.columns([row.index(title) for title in header])
                 if isinstance(header, dict):
                     self.converter(
-                        {
-                            idx: conv
-                            for idx, conv in enumerate(header.values())
-                            if conv
-                        }
+                        {idx: conv for idx, conv in enumerate(header.values()) if conv}
                     )
                 break
         return self
@@ -194,7 +190,7 @@ class Data:
 
     columns = include
 
-    def __iter__(self)->Iterator:
+    def __iter__(self) -> Iterator:
         if self._rows:
             self._data = split(self._data, self._rows)
         elif self._limit:
@@ -205,9 +201,7 @@ class Data:
         self._rows = count
 
     def print(self, format_spec, sep=" ", print_rows: bool = True):
-        tprint(
-            self._data, format_spec=format_spec, sep=sep, print_rows=print_rows
-        )
+        tprint(self._data, format_spec=format_spec, sep=sep, print_rows=print_rows)
 
     def groupby(self, key: Callable) -> dict:
         from collections import defaultdict

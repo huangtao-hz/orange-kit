@@ -40,9 +40,7 @@ def insert_paragraph_after(
     return new_para
 
 
-Font.name = Font.name.setter(
-    _setFontName
-)  # 替换掉原来的设置字体，以便支持中文字体
+Font.name = Font.name.setter(_setFontName)  # 替换掉原来的设置字体，以便支持中文字体
 Paragraph.insert_paragraph_after = (
     insert_paragraph_after  # 为段落对象增加在段后增加段落的功能
 )

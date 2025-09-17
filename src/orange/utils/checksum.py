@@ -22,9 +22,7 @@ def id_card(card_no: str) -> str | None:
         card_no = "19".join([card_no[:6], card_no[6:]])
         length += 2
     if 18 >= length >= 17:
-        return card_no[:17] + checksum(
-            card_no[:17], lambda x, y: int(x) * y, Key, Sum
-        )
+        return card_no[:17] + checksum(card_no[:17], lambda x, y: int(x) * y, Key, Sum)
 
 
 def org_code(code_no: str) -> str:
