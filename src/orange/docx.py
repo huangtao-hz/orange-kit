@@ -10,6 +10,7 @@ from docx.oxml.parser import OxmlElement
 from docx.styles.style import ParagraphStyle
 from docx.text.font import Font
 from docx.text.paragraph import Paragraph
+from typing import Optional
 
 
 def Remove(elem):
@@ -26,7 +27,7 @@ def _setFontName(self, value: str):
 
 
 def insert_paragraph_after(
-    self: Paragraph, text: str = "", style: ParagraphStyle = None
+    self: Paragraph, text: str = "", style: Optional[ParagraphStyle] = None
 ) -> Paragraph:
     "在指定的段落后面插入段落"
     "看不太懂，从网上抄的，貌似可以正常工作"
