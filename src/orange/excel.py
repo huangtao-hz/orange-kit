@@ -127,3 +127,5 @@ def read_excel(
                     for sheet in io.sheets()
                 )
             )
+    else:
+        raise Exception("参数有误")
