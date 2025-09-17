@@ -69,19 +69,34 @@ def proc_data(
 
 
 def read_excel(
-    io: Union[str, Path, bytes, Book],  # Excel 文件
+    io: Union[str, Path, bytes, Book, None] = None,  # Excel 文件
+    file_contents: Optional[bytes] = None,  # 文件内容
     sheets: Union[str, int, list, None] = None,  # 工作表名
     usecols: str = "",  # 选取列
     converter: Optional[Callable[[list], list]] = None,  # 按行转换程序
     skiprows: int = 0,  # 跳过行
     nrows: int = 0,  # 读取行数
 ) -> Iterable:
-    if isinstance(io, (str, Path)):
+    if file_contents is not None:
+        with open_workbook(file_contents=file_contents) as book:
+            return read_excel(
+                book,
+                sheets=sheets,
+                usecols=usecols,
+                converter=converter,
+                skiprows=skiprows,
+                nrows=nrows,
+            )
+    elif isinstance(io, (str, Path)):
         with open_workbook(Path(io)) as book:
-            return read_excel(book, sheets, usecols, converter, skiprows, nrows)
-    elif isinstance(io, bytes):
-        with open_workbook(file_contents=io) as book:
-            return read_excel(book, sheets, usecols, converter, skiprows, nrows)
+            return read_excel(
+                book,
+                sheets=sheets,
+                usecols=usecols,
+                converter=converter,
+                skiprows=skiprows,
+                nrows=nrows,
+            )
     elif isinstance(io, Book):
         if isinstance(sheets, int):
             sheet = io.sheet_by_index(sheets)
@@ -94,7 +109,14 @@ def read_excel(
         elif isinstance(sheets, Iterable):
             return chain(
                 *(
-                    read_excel(io, sheet, usecols, converter, skiprows, nrows)
+                    read_excel(
+                        io,
+                        sheets=sheet,
+                        usecols=usecols,
+                        converter=converter,
+                        skiprows=skiprows,
+                        nrows=nrows,
+                    )
                     for sheet in sheets
                 )
             )
