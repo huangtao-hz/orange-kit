@@ -50,14 +50,14 @@ def IterCols(col_str: str) -> Iterable:
 def proc_data(
     data: list,  # 原始数据
     usecols: str = "",  # 选取列
-    converter: Optional[Callable[[list], list]] = None,  # 按行转换程序
+    converter: Optional[Callable[[list], Optional[list]]] = None,  # 按行转换程序
     skiprows: int = 0,  # 跳过行
     nrows: int = 0,  # 读取行数
 ) -> Iterable:
     "对数据进行整理"
     if skiprows:
         data = data[skiprows:]
-    rdata=iter(data)
+    rdata = iter(data)
     if usecols:
         rdata = map(itemgetter(*IterCols(usecols)), rdata)
     if converter:
@@ -68,13 +68,8 @@ def proc_data(
         return rdata
 
 
-def conv(row):
-    row[0] = conv_date(row[0], "datetime")
-    return row
-
-
 def read_excel(
-    io: Union[str, Path, Book],  # Excel 文件
+    io: Union[str, Path, bytes, Book],  # Excel 文件
     sheets: Union[str, int, list, None] = None,  # 工作表名
     usecols: str = "",  # 选取列
     converter: Optional[Callable[[list], list]] = None,  # 按行转换程序
@@ -84,6 +79,9 @@ def read_excel(
     if isinstance(io, (str, Path)):
         with open_workbook(Path(io)) as book:
             return read_excel(book, sheets, usecols, converter, skiprows, nrows)
+    elif isinstance(io, bytes):
+        with open_workbook(file_contents=io) as book:
+            return read_excel(book, sheets, usecols, converter, skiprows, nrows)
     elif isinstance(io, Book):
         if isinstance(sheets, int):
             sheet = io.sheet_by_index(sheets)
@@ -91,23 +89,19 @@ def read_excel(
             return proc_data(data, usecols, converter, skiprows, nrows)
         elif isinstance(sheets, str):
             sheet = io.sheet_by_name(sheets)
-            data=sheet._cell_values
-            return proc_data(
-                data, usecols, converter, skiprows, nrows
-            )
+            data = sheet._cell_values
+            return proc_data(data, usecols, converter, skiprows, nrows)
         elif isinstance(sheets, Iterable):
             return chain(
                 *(
-                    read_excel(io,sheet, usecols, converter, skiprows, nrows)
+                    read_excel(io, sheet, usecols, converter, skiprows, nrows)
                     for sheet in sheets
                 )
             )
         elif sheets is None:
             return chain(
                 *(
-                    proc_data(
-                        sheet._cell_values, usecols, converter, skiprows, nrows
-                    )
+                    proc_data(sheet._cell_values, usecols, converter, skiprows, nrows)
                     for sheet in io.sheets()
                 )
             )
