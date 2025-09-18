@@ -13,6 +13,7 @@ from docx.shared import Pt
 
 from orange import Path, datetime, now, wlen
 from typing import Union
+from docx.styles.style import ParagraphStyle
 
 from .utils.hz import Ordinal
 
@@ -35,6 +36,7 @@ class Document:
         # section.right_margin = Cm(2.6)
 
         zw = self.document.styles["Normal"]
+        assert isinstance(zw, ParagraphStyle)
         zw.font.size = Pt(16)
         zw.font.name = "仿宋_GB2312"
         zw._element.rPr.rFonts.set(qn("w:eastAsia"), "仿宋_GB2312")
@@ -45,6 +47,7 @@ class Document:
         # zw.keep_together = False
 
         gwbt = self.document.styles.add_style("公文标题", WD_STYLE_TYPE.PARAGRAPH)
+        assert isinstance(gwbt, ParagraphStyle)
         gwbt.font.size = Pt(22)
         gwbt.font.name = "方正小标宋简体"
         gwbt._element.rPr.rFonts.set(qn("w:eastAsia"), "方正小标宋简体")
@@ -53,6 +56,7 @@ class Document:
         gwbt.paragraph_format.line_spacing = 1
 
         zw = self.document.styles.add_style("一级标题", WD_STYLE_TYPE.PARAGRAPH)
+        assert isinstance(zw, ParagraphStyle)
         zw.font.size = Pt(16)
         zw.font.name = "黑体"
         zw._element.rPr.rFonts.set(qn("w:eastAsia"), "黑体")
@@ -62,6 +66,7 @@ class Document:
         zw.paragraph_format.line_spacing = 1.5
 
         zw = self.document.styles.add_style("二级标题", WD_STYLE_TYPE.PARAGRAPH)
+        assert isinstance(zw, ParagraphStyle)
         zw.font.size = Pt(16)
         zw.font.name = "楷体"
         zw._element.rPr.rFonts.set(qn("w:eastAsia"), "楷体")
@@ -71,6 +76,7 @@ class Document:
         zw.paragraph_format.line_spacing = 1.5
 
         zw = self.document.styles.add_style("文号", WD_STYLE_TYPE.PARAGRAPH)
+        assert isinstance(zw, ParagraphStyle)
         zw.font.size = Pt(14)
         zw.font.name = "仿宋_GB2312"
         zw._element.rPr.rFonts.set(qn("w:eastAsia"), "仿宋_GB2312")
