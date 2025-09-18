@@ -18,7 +18,7 @@ def Remove(elem):
     return elem._element.getparent().remove(elem._element)
 
 
-def _setFontName(self, value: str):
+def _setFontName(self: Font, value: str):
     """增加中文字体的设置"""
     rPr = self._element.get_or_add_rPr()
     rPr.rFonts_ascii = value
