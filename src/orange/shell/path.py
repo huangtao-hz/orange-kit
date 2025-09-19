@@ -487,7 +487,7 @@ class Path(_Parent):
 
         self.write_xlsx(writer=writer, *tables, **kw)
 
-    def match(self, *patterns) -> bool:
+    def match_many(self, *patterns) -> bool:
         return any(map(super().match, patterns))
 
     def find(self, pattern: str, key=None, reverse: bool = True):
@@ -598,16 +598,16 @@ class Path(_Parent):
         "将本文件或文件打包成一个 Rar 文件"
         "如果当前路径为目录，并且目标路径也为目录的话，把当前文件夹打包后的压缩文件存在放在指定目录下"
         passwd = f"-p{passwd}" if passwd else ""
-        dest = Path(dest)
-        if not dest:
+        destdir = Path(dest)
+        if not destdir:
             raise Exception(f"目录 {dest} 不存在")
-        if dest.is_dir() and self.is_dir():
-            dest = dest / f"{self.name}.rar"
+        if destdir.is_dir() and self.is_dir():
+            destdir = destdir / f"{self.name}.rar"
         if self.is_dir():
             self.parent.chdir()
             os.system(f'rar a {passwd} "{dest}" "{self.name}"')
         else:
-            dest = dest / f"{self.pname}.rar"
+            destdir = destdir / f"{self.pname}.rar"
             os.system(f'rar a -ep {passwd} "{dest}" "{self}"')
 
 
@@ -651,7 +651,7 @@ def clean_trash():
 def repare_filename(pathes):
     for path in map(Path, pathes):
         if path.is_dir():
-            [p.repare_name() for p in path]
+            [p.repare_name() for p in path.iterdir()]
         else:
             path.repare_name()
 
