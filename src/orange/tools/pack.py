@@ -6,20 +6,21 @@
 # 创建：2022-04-23 08:53
 
 from orange import arg, Path, command
-detail = '''本程序用于打包文件夹
+
+detail = """本程序用于打包文件夹
 src:   源目录
 dest:  目标目录
 本程序可以将源目录下的每一个文件夹打包成一个 rar 文件，并使用 passwd 指定的密码进行加密
-'''
+"""
 
 
 @command(description=detail)
-@arg("src", help='源目录')
+@arg("src", help="源目录")
 @arg("dest", help="存放打包文件目录")
-@arg("-p", "--passwd", nargs='?', help="压缩包密码")
-def main(src, dest, passwd=None):
+@arg("-p", "--passwd", nargs="?", help="压缩包密码")
+def main(src, dest, passwd: str = ""):
     Path(src).pack(dest, passwd=passwd)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

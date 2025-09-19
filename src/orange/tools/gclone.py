@@ -11,7 +11,7 @@
 # from stdlib import parse_args,exec_shell
 from typing import Optional
 
-from orange import Path, arg, sh
+from orange import Path, arg, shell
 
 
 @arg("repos", nargs="+", metavar="repo", help="要下载的软件仓库，可以为多个")
@@ -24,7 +24,7 @@ def proc(repos: list[str], user: Optional[str] = None, protocol: str = "SSH"):
         config.read([str(Path("~/.gitconfig"))])
         try:
             user = config.get("user", "name")
-        except:
+        except Exception:
             raise Exception("用户不存在！")
     protocol = protocol.upper()
     URL = "git@github.com:" if protocol == "SSH" else "https://github.com/"
@@ -33,4 +33,4 @@ def proc(repos: list[str], user: Optional[str] = None, protocol: str = "SSH"):
             repo = f"{user}/{repo}"
         url = f"{URL}/{repo}.git"
         print("cloning", url)
-        sh(f"git clone {url}")
+        shell(f"git clone {url}")

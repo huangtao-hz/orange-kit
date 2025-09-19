@@ -5,7 +5,7 @@
 # Email:   huangtao.sh@icloud.com
 # 创建：2018-11-17 17:59
 
-from orange import HOME, Path, R, sh
+from orange import HOME, Path, R, shell
 
 dest = HOME / "OneDrive - business/图片/本机照片"
 Pattern = R / r".*?(?P<year>20\d{2})\-?(?P<month>\d{2})\-?(?P<day>\d{2}).*?"
@@ -15,7 +15,7 @@ Pattern = R / r".*?(?P<year>20\d{2})\-?(?P<month>\d{2})\-?(?P<day>\d{2}).*?"
 def main(path="."):
     if path != "noset":
         path = Path(path or ".")
-        for filename in path:
+        for filename in path.iterdir():
             if filename.lsuffix in (".jpg", ".mp4"):
                 m = Pattern == str(filename)
                 if m:
@@ -32,4 +32,4 @@ def main(path="."):
                         print(f"{filename} -> {dest_}", flush=True)
                     else:
                         print(f"{filename} -> {d}", flush=True)
-                        sh > f'copy "{filename}" "{d}"'
+                        shell(f'copy "{filename}" "{d}"')

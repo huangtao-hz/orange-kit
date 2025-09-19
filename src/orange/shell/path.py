@@ -345,7 +345,7 @@ class Path(_Parent):
         """
         _path = Path(dest)
         _path.ensure()
-        for path in self:
+        for path in self.iterdir():
             path.rar(str(_path), passwd=passwd)
 
     @property

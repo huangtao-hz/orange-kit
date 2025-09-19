@@ -5,7 +5,7 @@
 # Email:   huangtao.sh@icloud.com
 # 创建：2019-02-23 21:08
 
-from orange import HOME, Path, arg, command, sh
+from orange import HOME, Path, arg, command, shell
 
 Dest = HOME / "Videos"
 
@@ -26,4 +26,4 @@ def main(source, name):
     for vob in source.rglob("*.VOB"):
         d = (dest / vob.name).with_suffix(".mp4")
         if not d:
-            sh > f"ffmpeg -i {vob} {d}"
+            shell(f"ffmpeg -i {vob} {d}")
