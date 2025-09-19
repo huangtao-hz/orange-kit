@@ -8,7 +8,7 @@
 import os
 from subprocess import PIPE, run
 from sys import version_info
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 POSIX = os.name == "posix"
 encoding = "utf8" if POSIX else "gbk"
@@ -21,7 +21,7 @@ def shell(
     input=None,
     capture_output=True,
     **options,
-) -> tuple[int, str]:
+) -> Tuple[int, str]:
     """
     调用方式：   code,output = sh('dir')
     返回值：     code 系统返回值
@@ -33,9 +33,7 @@ def shell(
     for arg in args:
         if not isinstance(arg, str):
             arg = str(arg)
-        if any(space in arg for space in (" ", "\t")) and not arg.startswith(
-            '"'
-        ):
+        if any(space in arg for space in (" ", "\t")) and not arg.startswith('"'):
             arg = f'"{arg}"'
         params.append(arg)
     for option, arg in options.items():
@@ -85,7 +83,7 @@ class Shell(type):
         input=None,
         capture_output=True,
         **options,
-    ) -> Union[tuple[int, str], int]:
+    ) -> Union[Tuple[int, str], int]:
         """
         调用方式：   code,output = sh('dir')
         返回值：     code 系统返回值

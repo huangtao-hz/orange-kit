@@ -13,7 +13,7 @@
 
 from dataclasses import dataclass
 from functools import partial
-from typing import Optional
+from typing import Optional, Union
 
 from xlsxwriter import Workbook
 from xlsxwriter.worksheet import (
@@ -119,7 +119,7 @@ class Book(Workbook):
 
     def __init__(
         self,
-        filename: Path | str | None = None,
+        filename: Union[Path, str, None] = None,
         formats: Optional[dict] = {},
         **kw,
     ):
@@ -178,7 +178,7 @@ class Book(Workbook):
         return self._worksheet
 
     @worksheet.setter
-    def worksheet(self,     name):
+    def worksheet(self, name):
         """切换当前工作表"""
         if not name:
             self._sheets += 1
@@ -202,19 +202,11 @@ class Book(Workbook):
     ):
         if isinstance(cell_format, str):
             cell_format = self._formats.get(cell_format)
-        if (last_row is None) or (
-            first_row == last_row and first_col == last_col
-        ):
+        if (last_row is None) or (first_row == last_row and first_col == last_col):
             if self.worksheet and isinstance(value, (tuple, list)):
-                self.worksheet.write_row(
-                    first_row, first_col, value, cell_format
-                )
+                self.worksheet.write_row(first_row, first_col, value, cell_format)
             else:
-                if (
-                    self.worksheet
-                    and isinstance(value, str)
-                    and value.startswith("=")
-                ):
+                if self.worksheet and isinstance(value, str) and value.startswith("="):
                     value = Row / value % self._convert  # 使用正则表达式替换
                 self.worksheet.write(first_row, first_col, value, cell_format)
         else:
@@ -332,9 +324,7 @@ class Book(Workbook):
             kw["bottom"] = bottom if r == last_row else inner
             kw["left"] = left if c == first_col else inner
             kw["right"] = right if c == last_col else inner
-            name = "".join(
-                [str(kw[name]) for name in "left top right bottom".split()]
-            )
+            name = "".join([str(kw[name]) for name in "left top right bottom".split()])
             if fmt and hasattr(fmt, "name"):
                 name = name + "-" + fmt.name
             if name not in self._formats:
@@ -397,8 +387,7 @@ class Book(Workbook):
                         new_column["format"] = self._formats.get(format)
                 if hformat := new_column.get("header_format"):
                     if isinstance(hformat, str):
-                        new_column["header_format"] = self._formats.get(
-                            hformat)
+                        new_column["header_format"] = self._formats.get(hformat)
                 new_columns.append(new_column)
             if header_format:
                 if isinstance(header_format, str):
@@ -414,9 +403,7 @@ class Book(Workbook):
             if kwargs.get("total_row", False):
                 last_row += 1
             kwargs["data"] = data
-        self.worksheet.add_table(
-            first_row, first_col, last_row, last_col, kwargs
-        )
+        self.worksheet.add_table(first_row, first_col, last_row, last_col, kwargs)
 
 
 def write_excel(

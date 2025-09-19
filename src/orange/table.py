@@ -7,7 +7,7 @@
 
 from dataclasses import dataclass
 from operator import itemgetter
-from typing import Callable, Iterable, Optional
+from typing import Callable, Iterable, Optional, Dict
 
 from orange.shell import Path
 from orange.utils.htutil import classproperty
@@ -62,7 +62,7 @@ class Table(object):
     tablename = ""  # 表名
 
     @classproperty
-    def Columns(cls) -> dict[str, Column]:
+    def Columns(cls) -> Dict[str, Column]:
         return {k: v for k, v in cls.__dict__.items() if isinstance(v, Column)}
 
     @classmethod
@@ -139,6 +139,7 @@ class Table(object):
     ):
         "导出数据"
         from .xlsx import write_excel
+
         if path is not None:
             with write_excel(path) as book:
                 cls.export(
