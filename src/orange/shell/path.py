@@ -25,15 +25,15 @@ import pathlib
 import re
 import sys
 from codecs import BOM_BE, BOM_LE, BOM_UTF8
-from contextlib import contextmanager, suppress
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from contextlib import suppress
+from tempfile import TemporaryDirectory
 from typing import Iterable, Optional, Union
 
 from packaging.version import Version
 
 from orange.utils import Data, arg, command
 
-from .shell import POSIX, sh
+from .shell import POSIX, shell
 
 
 class TempDir(TemporaryDirectory):
@@ -48,24 +48,6 @@ tempdir = TempDir
 _UrlPattern = re.compile(r"\%[0-9A-E]{2}")
 
 OldVersion = sys.version_info <= (3, 12)
-
-
-@contextmanager
-def tempfile(data=None, writer=None, **kw):
-    if data:
-        kw["mode"] = "wb" if isinstance(data, bytes) else "w"
-    kw["delete"] = False
-    try:
-        with NamedTemporaryFile(**kw) as f:
-            if data:
-                f.write(data)
-            if callable(writer):
-                writer(f)
-            tmp = Path(f.name)
-        yield tmp
-    finally:
-        tmp.unlink()
-
 
 BOM_CODE = {
     BOM_UTF8: "utf_8",
@@ -141,10 +123,6 @@ class Path(_Parent):
     @classmethod
     def tempdir(cls, *args, **kw):
         return TempDir(*args, **kw)
-
-    @classmethod
-    def tempfile(cls, data=None, writer=None, suffix=None, **kw):
-        return tempfile(data=data, writer=writer, suffix=suffix, **kw)
 
     def __new__(cls, *args, **kwargs):
         """Construct a PurePath from one or several strings and or existing
@@ -232,13 +210,15 @@ class Path(_Parent):
         with xlrd.open_workbook(filename=str(self)) as book:
             return book.sheets()
 
-    def sheets(self, index:Union[int,str,None]=None, *pipelines, header=None)->Iterable:
+    def sheets(
+        self, index: Union[int, str, None] = None, *pipelines, header=None
+    ) -> Iterable:
         """提供读取指定worksheet的功能，其中index可以为序号，
         也可以为表的名称。"""
         import xlrd3 as xlrd
 
         book = xlrd.open_workbook(filename=str(self))
-        sheet=None
+        sheet = None
         if isinstance(index, int):
             sheet = book.sheet_by_index(index)
         elif isinstance(index, str):
@@ -271,7 +251,7 @@ class Path(_Parent):
         filter=None,
         converter=None,
         **kw,
-    ) -> Data:
+    ) -> Iterable:
         """读取 csv 数据
         encoding :  指定文件的编码
         errors:     指定编码解码错误时的处理策略
@@ -336,7 +316,7 @@ class Path(_Parent):
             members = conv_members(members, "/" if POSIX else "\\")
             members = " ".join(members) if members else ""
             cmd = f"unrar x -p{password}" if password else "unrar x"
-            sh >f"{cmd} {self} {members} {path}"
+            shell(f"{cmd} {self} {members} {path}")
         elif any(map(name.endswith, (".tar.gz", ".tgz", ".gz"))):
             import tarfile
 
@@ -366,7 +346,7 @@ class Path(_Parent):
         _path = Path(dest)
         _path.ensure()
         for path in self:
-            path.rar(_path, passwd=passwd)
+            path.rar(str(_path), passwd=passwd)
 
     @property
     def lsuffix(self) -> str:
@@ -539,7 +519,13 @@ class Path(_Parent):
             print(self.name, "->", name)
             self.rename(self.with_name(name))
 
-    def read_sheet(self, *args, sheet: Union[str, int, list, None] = None, start_row: int = 0, **kwargs)->Iterable:
+    def read_sheet(
+        self,
+        *args,
+        sheet: Union[str, int, list, None] = None,
+        start_row: int = 0,
+        **kwargs,
+    ) -> Iterable:
         """
         读取 Excel 文件
         其中，*args,**kwargs 为 Data 类的参数
@@ -548,9 +534,10 @@ class Path(_Parent):
         """
         assert self.lsuffix.startswith(".xls")
         from orange.excel import read_excel
-        data=read_excel(self,sheets=sheet,skiprows=start_row)
+
+        data = read_excel(self, sheets=sheet, skiprows=start_row)
         if args or kwargs:
-            data=Data(data,*args,**kwargs)
+            data = Data(data, *args, **kwargs)
         return data
 
     def read_data(
@@ -607,7 +594,7 @@ class Path(_Parent):
             pipelines.append(mapper(lambda row: [unquote(x, quote) for x in row]))
         return Data(data, *pipelines, *args, **kwargs)
 
-    def rar(self, dest: str, passwd=None):
+    def rar(self, dest: str, passwd: Optional[str] = None):
         "将本文件或文件打包成一个 Rar 文件"
         "如果当前路径为目录，并且目标路径也为目录的话，把当前文件夹打包后的压缩文件存在放在指定目录下"
         passwd = f"-p{passwd}" if passwd else ""

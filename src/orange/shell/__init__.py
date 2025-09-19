@@ -7,13 +7,22 @@
 
 from .path import (
     HOME,
-    POSIX,
     Cloud,
     Path,
     decode,
     is_dev,
     is_installed,
-    tempdir,
-    tempfile,
 )
-from .shell import POSIX, sh
+from .shell import shell, POSIX
+
+
+__all__ = (
+    "HOME",
+    "POSIX",
+    "Cloud",
+    "Path",
+    "decode",
+    "is_dev",
+    "is_installed",
+    "shell",
+)
