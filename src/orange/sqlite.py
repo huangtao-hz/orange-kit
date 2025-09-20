@@ -98,12 +98,10 @@ class Connection(sqlite3.Connection):
         """分离数据库"""
         return self.execute(f"detach database {name}")
 
-    def fprint(self, sql: str, params: list = [], sep=" ", end="\n"):
+    def print(self, sql: str, params: list = [], sep=" ", end="\n"):
         "打印查询结果"
         for row in self.fetch(sql, params):
             print(*row, sep=sep, end=end)
-
-    print = fprint
 
     def printlist(self, sql: str, params: list = []):
         "以列表形式打印查询结果"
@@ -120,6 +118,7 @@ class Connection(sqlite3.Connection):
         )
 
     def print_row(self, header: Union[Iterable[str], str], sql: str, params: list = []):
+        "以 Key value 配对打印一行数据"
         if isinstance(header, str):
             header = header.split(",")
         length = max(map(wlen, header))
@@ -141,10 +140,9 @@ class Connection(sqlite3.Connection):
         if ver := self.get_ver(name):
             print("数据版本", ver, sep="：")
 
-    def fprintf(self, fmt: str, sql: str, params: list = [], print_rows: bool = True):
+    def printf(self, fmt: str, sql: str, params: list = [], print_rows: bool = True):
+        "格式化打印数据"
         tprint(self.fetch(sql, params), format_spec=fmt, print_rows=print_rows)
-
-    printf = fprintf
 
     def lcheck(
         self,
