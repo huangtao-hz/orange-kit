@@ -178,7 +178,7 @@ class Book(Workbook):
         return self._worksheet
 
     @worksheet.setter
-    def worksheet(self, name):
+    def worksheet(self, name: str):
         """切换当前工作表"""
         if not name:
             self._sheets += 1

@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+import sys
+
+sys.path.insert(0, "src")
+from orange.word import Document
+
+d = Document()
+d.add_title("关于印发治理条例的通知")
+d.add_zsjg("境内各分支机构：")
+d.add_para("为了做好工作，现将有关事项通知如下：")
+d.add_heading("一、变更内容", 1)
+d.add_para("你在干什么？")
+d.add_fwjg("运营管理部")
+d.save("~/Downloads/hello.docx")
