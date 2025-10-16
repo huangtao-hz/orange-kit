@@ -8,7 +8,7 @@
 from contextlib import suppress
 from itertools import chain
 from operator import itemgetter
-from typing import Callable, Iterable, Literal, Optional, Union
+from typing import Callable, Iterable, Literal, Optional, Union, List
 
 from xlrd3 import Book, open_workbook, xldate_as_tuple
 
@@ -48,9 +48,9 @@ def IterCols(col_str: str) -> Iterable:
 
 
 def proc_data(
-    data: list,  # 原始数据
+    data: List,  # 原始数据
     usecols: str = "",  # 选取列
-    converter: Optional[Callable[[list], Optional[list]]] = None,  # 按行转换程序
+    converter: Optional[Callable[[List], Optional[List]]] = None,  # 按行转换程序
     skiprows: int = 0,  # 跳过行
     nrows: int = 0,  # 读取行数
 ) -> Iterable:
