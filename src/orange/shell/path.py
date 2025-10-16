@@ -28,6 +28,7 @@ from codecs import BOM_BE, BOM_LE, BOM_UTF8
 from contextlib import suppress
 from tempfile import TemporaryDirectory
 from typing import Iterable, Optional, Union
+from urllib.parse import unquote_plus
 
 from packaging.version import Version
 
@@ -505,9 +506,9 @@ class Path(_Parent):
         """修复网络下载的乱字符文件名"""
         name = self.name
         if _UrlPattern.search(name):
-            import urllib
+            from urllib.parse import unquote_plus
 
-            name = urllib.parse.unquote_plus(name)
+            name = unquote_plus(name)
         else:
             if POSIX:
                 from unicodedata import normalize
