@@ -506,8 +506,6 @@ class Path(_Parent):
         """修复网络下载的乱字符文件名"""
         name = self.name
         if _UrlPattern.search(name):
-            from urllib.parse import unquote_plus
-
             name = unquote_plus(name)
         else:
             if POSIX:
@@ -672,6 +670,6 @@ def add_music_lib(path=None):
                 destname = (dest / path.name).with_suffix(".m4a")
                 if not destname:
                     # 进行转码
-                    sh(f'ffmpeg -i "{path}" -acodec alac "{destname}"')
+                    shell(f'ffmpeg -i "{path}" -acodec alac "{destname}"')
                 if destname:
                     path.unlink()  # 目标文件建立成功，删除源文件
