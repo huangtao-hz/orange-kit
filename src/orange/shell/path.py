@@ -567,21 +567,24 @@ class Path(_Parent):
             next(data)
         if offsets:
 
-            def _split(row):
+            def _split1(row):
                 start = offsets[0]
                 d = []
                 for end in [*offsets[1:], None]:
                     d.append(row[start:end])
                     start = end
                 return d
+
+            data = map(_split1, data)
         else:
             if isinstance(sep, str):
                 sep = sep.encode(encoding)
 
-            def _split(row):
+            def _split2(row):
                 return row.split(sep)
 
-        data = map(_split, data)
+            data = map(_split2, data)
+
         pipelines = []
         columns = columns or include
         if columns:

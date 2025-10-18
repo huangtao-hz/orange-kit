@@ -10,7 +10,7 @@
 
 from typing import Optional
 
-from orange.shell import POSIX, Path, sh
+from orange.shell import POSIX, Path, shell
 from orange.utils.click import arg, command
 
 libpath = Path("~/Documents/pylib")
@@ -20,7 +20,7 @@ PYTHON = "python3" if POSIX else "python"
 
 def run_cmd(cmd: str, *args, **kw):
     "执行系统命令"
-    sh(cmd, *args, capture_output=False, **kw)
+    shell(cmd, *args, capture_output=False, **kw)
 
 
 def run_mod(mod, *args, **kw):
@@ -32,7 +32,7 @@ def pyclean():
     "清理打包过程中生成的中间文件"
     Patterns = ("build", "dist", "*egg-info")
     for path in Path(".").iterdir():
-        if path.match(*Patterns):
+        if path.match_many(*Patterns):
             path.rmtree()
             print(f"Path {path} have been deleted!")
 
