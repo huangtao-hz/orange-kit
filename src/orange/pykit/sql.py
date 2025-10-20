@@ -9,6 +9,7 @@
 
 from orange import arg
 from orange.sqlite import connect
+from typing import List
 
 
 @arg("-d", "--db", dest="db", default=":memory:", nargs="?", help="连接的数据库")
@@ -22,7 +23,7 @@ from orange.sqlite import connect
     help="显示创建语句",
 )
 @arg("sql", nargs="*", help="执行的 sql 语句")
-def execsql(db: str, list: bool, tables: list[str], sql: str):
+def execsql(db: str, list: bool, tables: List[str], sql: str):
     _db = connect(db)
     if sql:
         sql = " ".join(sql)
