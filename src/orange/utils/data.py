@@ -11,7 +11,7 @@
 """
 
 from operator import itemgetter
-from typing import Callable, Iterable, Iterator
+from typing import Callable, Iterable, Iterator, List
 
 from .htutil import get_md5, limit, split, tprint
 
@@ -152,7 +152,7 @@ class Data:
         self._rows = rows
         self._limit = limit
 
-    def header(self, header: list[str]):
+    def header(self, header: List[str]):
         for row in self._data:
             if all(x in row for x in header):
                 self.columns([row.index(title) for title in header])

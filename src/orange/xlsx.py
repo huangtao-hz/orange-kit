@@ -13,7 +13,7 @@
 
 from dataclasses import dataclass
 from functools import partial
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 
 from xlsxwriter import Workbook
 from xlsxwriter.worksheet import (
@@ -412,7 +412,7 @@ class Book(Workbook):
 
 
 def write_excel(
-    filename: str | Path | None = None, formats: Optional[dict] = {}, **kw
+    filename: Union[str, Path, None] = None, formats: Optional[Dict] = {}, **kw
 ) -> Book:
     return Book(filename, formats, **kw)
 
