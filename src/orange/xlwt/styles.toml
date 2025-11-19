@@ -1,0 +1,52 @@
+[[style]]
+name = "Title"
+font_name = "黑体"
+font_size = 16
+halign = "centerContinuous"
+valign = "center"
+
+[[style]]
+name = "Header"
+font_name = "黑体"
+halign = "center"
+valign = "center"
+
+[[style]]
+name = "Percent"
+num_fmt = "Percent"
+halign = "right"
+valign = "center"
+
+[[style]]
+name = "Currency"
+num_fmt = "Currency"
+halign = "right"
+valign = "center"
+
+[[style]]
+name = "Number"
+num_fmt = "Number"
+halign = "right"
+valign = "center"
+
+[[style]]
+name = "Date"
+num_fmt = "Date"
+halign = "right"
+valign = "center"
+
+[[style]]
+name = "Normal"
+halign = "left"
+valign = "center"
+wrap_text = true
+
+[[style]]
+name = "Short"
+halign = "center"
+valign = "center"
+
+[[style]]
+name = "Normal-NoWrap"
+halign = "left"
+valign = "center"
