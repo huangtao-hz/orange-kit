@@ -22,7 +22,7 @@ from orange.utils.htutil import tprint, wlen
 
 
 def Values(count):
-    """提供 sql 语句的占符  用法： f"insert into test(a,b,c) Values(3)" """
+    """提供 sql 语句的占符  用法： f"insert into test(a,b,c) {Values(3)}" """
     return f"VALUES({','.join('?' * count)})"
 
 
