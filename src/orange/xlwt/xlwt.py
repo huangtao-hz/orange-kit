@@ -163,7 +163,18 @@ class Sheet(Worksheet):
         for column in columns.split(","):
             cols = list(map(colname_to_col, column.split(":")))
             assert 1 <= len(cols) <= 2
-            self.set_column(cols[0], cols[-1], width, cell_format, options)
+            # self.col_info[col] = [width, cell_format, hidden, level, collapsed, False]
+            for col in range(cols[0], cols[-1] + 1):
+                colproperty = self.col_info.get(col, None)
+                if colproperty:
+                    if width:
+                        colproperty[0] = width
+                    if cell_format:
+                        colproperty[1] = cell_format
+                    if "hidden" in options:
+                        colproperty[2] = options.get("hidden")
+                else:
+                    self.set_column(col, col, width, cell_format, options)
 
     def set_widths(self, widths: Dict[str, float]):
         '设置列宽，widths :dict[columns,width],其中，columns是： "A:B,C:D,G"'
