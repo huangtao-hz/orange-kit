@@ -148,18 +148,21 @@ class Sheet(Worksheet):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.cur_row = 1
+        self.workbook: Optional[Book] = None
 
     def set_columns(
         self,
         columns: str,
         width: Optional[float] = None,
-        cell_format: Optional[Format] = None,
+        cell_format: Union[str, Format, None] = None,
         options: Optional[Dict] = None,
     ):
         """设置当前工作表的列属性，允许同时设置多个，使用方法如下：
         book.set_columns('A:C,E:D,G:H',width=12)
         """
         options = options or {}
+        if cell_format is not None and isinstance(cell_format, str):
+            cell_format = self.get_format(cell_format)
         for column in columns.split(","):
             cols = list(map(colname_to_col, column.split(":")))
             assert 1 <= len(cols) <= 2
@@ -186,6 +189,11 @@ class Sheet(Worksheet):
         options = {"hidden": True}
         self.set_columns(columns, options=options)
 
+    def get_format(self, name: str) -> Optional[Format]:
+        "根据名称获取样式"
+        assert self.workbook is not None
+        return self.workbook.get_format(name)
+
 
 class Book(Workbook):
     """对Xlsxwriter模块进一步进行封装"""
@@ -199,14 +207,14 @@ class Book(Workbook):
         if isinstance(filename, (Path, str)):
             filename = str(Path(filename))
         super().__init__(filename, **kw)
-        self._worksheet: Optional[Worksheet] = None  # 设置当前的工作表为空
-        self._worksheets = {}  # 设置当前的工作表清单为空
-        self._formats = {}
-        self._sheets = 0  # 默认sheet名
+        self._formats: Dict[str, Format] = {}
         if formats:
             self.add_formats(formats)
+        self.add_pkg_formats("orange", "xlwt/styles.toml")
 
-        self.add_pkg_formats("xlsx", "styles.toml")
+    def get_format(self, name: str) -> Optional[Format]:
+        "根据名称获取样式"
+        return self._formats.get(name, None)
 
     def add_named_format(self, properties, name=None):
         "添加带名字的样式"
@@ -242,11 +250,11 @@ class Book(Workbook):
 
     def add_sheet(self, name: str) -> Sheet:
         """添加工作表"""
-        worksheet = self._worksheets.get(name, None)
+        worksheet = self.sheetnames.get(name, None)
         if not worksheet:
             worksheet = self.add_worksheet(name, Sheet)
-            self._worksheets[name] = worksheet
-        assert isinstance(worksheet, Sheet)
+            assert isinstance(worksheet, Sheet)
+            worksheet.workbook = self
         return worksheet
 
     def set_widths(self, widths):

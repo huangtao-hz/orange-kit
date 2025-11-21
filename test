@@ -17,12 +17,13 @@ with Book("~/table3.xlsx") as book:
     )
     """
     sheet = book.add_sheet("hello")
-
     sheet.set_widths(
         {
             "A:B": 20,
             "C:D,G": 17,
         }
     )
+    sheet.set_columns("A:B", cell_format="Percent")
     sheet.set_hidden("D:E,I")
+
     print("导出文件成功")
