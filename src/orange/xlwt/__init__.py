@@ -1,3 +1,3 @@
-from .xlwt import Book, Header, Sheet, Style
+from .xlwt import Book, Header, Sheet
 
-__all__ = ("Book", "Sheet", "Header", "Style")
+__all__ = ("Book", "Sheet", "Header")

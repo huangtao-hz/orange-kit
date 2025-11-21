@@ -2,18 +2,13 @@
 import sys
 
 sys.path.insert(0, "src")
-from orange import Path
-from orange.xlwt import Book, Sheet
+# from orange import Path
+from orange.xlwt import Book, Header
 
 with Book("~/table3.xlsx") as book:
     """
     book.add_table(
-        pos="A1",
-        columns=[
-            Header("姓名", width=12, format="normal"),
-            Header("年龄", width=15, format="percent"),
-        ],
-        data=[["张三", 0.23], ["历史", 0.34]],
+
     )
     """
     sheet = book.add_sheet("hello")
@@ -23,7 +18,22 @@ with Book("~/table3.xlsx") as book:
             "C:D,G": 17,
         }
     )
-    sheet.set_columns("A:B", cell_format="Percent")
-    sheet.set_hidden("D:E,I")
-
+    sheet.addtable(
+        start_col="A",
+        columns=[
+            Header("姓名", format="Normal", total_string="合计"),
+            Header(
+                "年龄",
+                format="Percent",
+                total_function="sum",
+            ),
+            Header(
+                "公平",
+                format="Percent",
+                formula="[年龄]*1.1",
+                total_function="Table1[[#Totals],[年龄]]*1.5",
+            ),
+        ],
+        data=[["张三", 0.23], ["历史", 0.34]],
+    )
     print("导出文件成功")
