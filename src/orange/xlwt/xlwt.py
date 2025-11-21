@@ -15,6 +15,7 @@ from functools import partial
 from pkgutil import get_data
 from typing import Dict, Optional, Union, Any, Iterable
 from orange import Path
+from orange.sqlite import Connection
 
 from toml import loads
 from xlsxwriter import Workbook
@@ -162,7 +163,7 @@ class Sheet(Worksheet):
         total_row = False
         columns = kwargs.get("columns")
         if not columns and "header" in kwargs:
-            columns = [Header(header) for header in kwargs["header"].split(",")]
+            columns = [Header(header) for header in kwargs.pop("header").split(",")]
         if not columns:
             raise Exception("添加表格，必须包含 header 或 columns ")
         for i in range(len(columns)):
@@ -185,6 +186,7 @@ class Sheet(Worksheet):
             kwargs["total_row"] = True
             last_row += 1
         kwargs["data"] = data
+        print(kwargs)
         super().add_table(first_row, first_col, last_row, last_col, kwargs)
         self.cur_row += last_row + 2
 
@@ -248,3 +250,26 @@ class Book(Workbook):
             assert isinstance(worksheet, Sheet)
             worksheet.workbook = self
         return worksheet
+
+
+def export_xlsx(db: Connection, table: str, xlsx_file: str):
+    """
+    for file in files.split(","):
+        b = get_data(pkg, file)
+        if b:
+            d = loads(b.decode())
+            print(d)
+    """
+    book = Book(str(Path(xlsx_file)))
+    x = loads(table)
+    sheet = book.add_sheet(x.pop("sheet"))
+    if "widths" in x:
+        sheet.set_widths(x["widths"])
+    if "formats" in x:
+        for col, fmt in x["formats"].items():
+            sheet.set_columns(col, cell_format=fmt)
+    data = db.fetch(x.pop("query"))
+    sheet.addTable(start_col=x["start_col"], data=data, header=x["header"])
+    print(x)
+    book.close()
+    print(f"保存文件：{xlsx_file} 成功")

@@ -3,7 +3,31 @@ import sys
 
 sys.path.insert(0, "src")
 # from orange import Path
-from orange.xlwt import Book, Header
+from orange import connect
+from orange.xlwt import export_xlsx
+
+s = '''
+sheet = "分工表"
+query = """\
+select b.bh,b.mc,a.ywxz,a.jsxz,b.cszt
+from ystmb b left join fgmxb a  on a.bh=b.bh
+where b.tcrq=(select max(tcrq)from ystmb)
+order by b.bh\
+"""
+header = "条目编号,功能名称,业务小组,技术小组,进度"
+start_col = "A"
+
+[widths]
+"A" = 20
+"B" = 110
+"C:D" = 30
+"E" = 15
+
+[formats]
+"A:E" = "Normal"'''
+db = connect("xgm2025-03")
+export_xlsx(db, s, "~/table.xlsx")
+'''
 
 with Book("~/table3.xlsx") as book:
     """
@@ -37,3 +61,5 @@ with Book("~/table3.xlsx") as book:
         data=[["张三", 0.23], ["历史", 0.34]],
     )
     print("导出文件成功")
+
+'''

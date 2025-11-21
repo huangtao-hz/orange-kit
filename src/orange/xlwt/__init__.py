@@ -1,3 +1,2 @@
-from .xlwt import Book, Header, Sheet
-
-__all__ = ("Book", "Sheet", "Header")
+# pylint:disable=unused-import
+from .xlwt import export_xlsx as export_xlsx
