@@ -13,9 +13,7 @@
 
 from functools import partial
 from pkgutil import get_data
-from typing import Dict, Optional, Union, Any, Iterable
-from orange import Path
-from orange.sqlite import Connection
+from typing import Any, Dict, Iterable, Optional, Union
 
 from toml import loads
 from xlsxwriter import Workbook
@@ -23,6 +21,9 @@ from xlsxwriter.worksheet import (
     Format,
     Worksheet,
 )
+
+from orange import Path
+from orange.sqlite import Connection
 
 
 def colname_to_col(col_str: str) -> int:
@@ -168,6 +169,8 @@ class Sheet(Worksheet):
             raise Exception("添加表格，必须包含 header 或 columns ")
         for i in range(len(columns)):
             column = columns[i]
+            if "name" in column:
+                column["header"] = column.pop("name")
             if "header_format" not in column:
                 column["header_format"] = "Header"
             for fmt in ("format", "header_format", "total_format"):
@@ -186,7 +189,6 @@ class Sheet(Worksheet):
             kwargs["total_row"] = True
             last_row += 1
         kwargs["data"] = data
-        print(kwargs)
         super().add_table(first_row, first_col, last_row, last_col, kwargs)
         self.cur_row += last_row + 2
 
@@ -253,23 +255,22 @@ class Book(Workbook):
 
 
 def export_xlsx(db: Connection, table: str, xlsx_file: str):
-    """
-    for file in files.split(","):
-        b = get_data(pkg, file)
-        if b:
-            d = loads(b.decode())
-            print(d)
-    """
+    "导出报表到 Excel 文件"
     book = Book(str(Path(xlsx_file)))
     x = loads(table)
     sheet = book.add_sheet(x.pop("sheet"))
-    if "widths" in x:
-        sheet.set_widths(x["widths"])
-    if "formats" in x:
-        for col, fmt in x["formats"].items():
+    if widths := x.pop("widths", None):
+        sheet.set_widths(widths)
+    if formats := x.pop("formats", None):
+        for col, fmt in formats.items():
             sheet.set_columns(col, cell_format=fmt)
+    if columns := x.pop("hidden", None):
+        sheet.set_hidden(columns)
     data = db.fetch(x.pop("query"))
-    sheet.addTable(start_col=x["start_col"], data=data, header=x["header"])
-    print(x)
+    start_col = x.pop("start_col", "A")
+    if "column" in x:
+        x["columns"] = x.pop("column")
+    if data:
+        sheet.addTable(start_col=start_col, data=data, **x)
     book.close()
     print(f"保存文件：{xlsx_file} 成功")

@@ -25,41 +25,94 @@ start_col = "A"
 
 [formats]
 "A:E" = "Normal"'''
+
+d = '''sheet = "统计表"
+query = """\
+-- 开发统计，统计各开发小组当期的完成情况
+select ifnull(b.xz,"其他") as jsxz,
+c.rs,
+sum(iif(a.cszt like '0%',1,0)),
+sum(iif(a.cszt like '1%',1,0)),
+sum(iif(a.cszt like '2%',1,0)),
+sum(iif(a.cszt like '3%',1,0)),
+sum(iif(a.cszt like '4%',1,0)),
+count(a.bh) as sl,
+sum(d.xjys),sum(d.ljys)
+from ystmb a
+left join xmryb b on a.jsfzr=b.xm and lb="0-总行科技"
+left join (select xz,count(xz)as rs from xmryb where lb in("0-总行科技","1-通用外包","2-赞同公司")group by xz)c on b.xz=c.xz
+left join (select bh,count(distinct jym)as xjys,count(distinct yjym)as ljys from jydzb group by bh) d on a.bh=d.bh
+where tcrq=(select max(tcrq)from ystmb)
+group by jsxz
+order by sl desc\
+"""
+start_col = "A"
+name = "开发情况统计表"
+
+[widths]
+"A" = 20
+"B:Z" = 10
+
+[[column]]
+name = "技术小组"
+total_string = "合计"
+
+[[column]]
+name = "人员数量"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "冒烟不通过"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "冒烟测试"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "集成测试"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "待验收"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "完成验收"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "总数"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "新交易数"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "迁移老交易数"
+format = "Number"
+total_function = "sum"
+
+[[column]]
+name = "开发完成率"
+format = "Percent"
+formula = "([待验收]+[完成验收]+[集成测试])/[总数]"
+total_function = "(开发情况统计表[[#Totals],[集成测试]]+开发情况统计表[[#Totals],[待验收]]+开发情况统计表[[#Totals],[完成验收]])/开发情况统计表[[#Totals],[总数]]"
+
+[[column]]
+name = "测试完成率"
+format = "Percent"
+formula = "([待验收]+[完成验收])/[总数]"
+total_function = "([[#Totals],[待验收]]+[[#Totals],[完成验收]])/[[#Totals],[总数]]"
+'''
 db = connect("xgm2025-03")
-export_xlsx(db, s, "~/table.xlsx")
-'''
-
-with Book("~/table3.xlsx") as book:
-    """
-    book.add_table(
-
-    )
-    """
-    sheet = book.add_sheet("hello")
-    sheet.set_widths(
-        {
-            "A:B": 20,
-            "C:D,G": 17,
-        }
-    )
-    sheet.addtable(
-        start_col="A",
-        columns=[
-            Header("姓名", format="Normal", total_string="合计"),
-            Header(
-                "年龄",
-                format="Percent",
-                total_function="sum",
-            ),
-            Header(
-                "公平",
-                format="Percent",
-                formula="[年龄]*1.1",
-                total_function="Table1[[#Totals],[年龄]]*1.5",
-            ),
-        ],
-        data=[["张三", 0.23], ["历史", 0.34]],
-    )
-    print("导出文件成功")
-
-'''
+export_xlsx(db, d, "~/table.xlsx")
