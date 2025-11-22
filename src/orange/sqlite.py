@@ -14,7 +14,10 @@
 import sqlite3
 from contextlib import closing
 from functools import wraps
+from pkgutil import get_data
 from typing import Callable, Iterable, Optional, Union
+
+from toml import loads
 
 from orange.shell import Path
 from orange.utils.datetime_ import datetime
@@ -268,6 +271,23 @@ class Connection(sqlite3.Connection):
                 func(*args, **kw)
 
         return _
+
+    def export_excel(self, pkg: str, excel_file: Union[Path, str], *files):
+        """导出数据到 Excel 文件
+        Args:
+            pkg: 包名
+            excel_file: 输出的文件名
+            files: 包内的文件列表，该文件为 toml 文件，用于描述输出的表格
+        """
+        from orange.xlwt import Book
+
+        book = Book(str(excel_file))
+        for file in files:
+            if toml_data := get_data(pkg, file):
+                toml = loads(toml_data.decode())
+                if data := self.fetch(toml.pop("query")):
+                    book.add_table_toml(data=data, **toml)
+        book.close()
 
 
 def connect(db: Union[str, Path], **kw) -> Connection:

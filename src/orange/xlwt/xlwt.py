@@ -10,10 +10,10 @@
 # 修订：2021-08-15 15:27 新增 Style class
 # 修改：2023-05-31 11:26 Header 增加 formula 参数的说明
 # 修订：2025-11-19 19:49 调整为两个类
+# 修订：2025-11-22 08:12 增加对 toml 描述表格的支持
 
-from functools import partial
 from pkgutil import get_data
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from toml import loads
 from xlsxwriter import Workbook
@@ -22,47 +22,34 @@ from xlsxwriter.worksheet import (
     Worksheet,
 )
 
-from orange import Path
-from orange.sqlite import Connection
-
 
 def colname_to_col(col_str: str) -> int:
     "将列名转换为坐标"
-    expn, col = 0, 0
+    expn, col = 26, 0
     for char in reversed(col_str):
-        col += (ord(char) - ord("A") + 1) * (26**expn)
-        expn += 1
+        col += (ord(char) - ord("A") + 1) * expn
+        expn *= 26
     return col - 1
 
 
 def Header(
     header: str,
-    width: Optional[float] = None,
     format: Optional[str] = None,
     **kw,
 ):
     """设置 Excel 表头
     Params:
         header:表头
-        width:列宽
         format:行样式
-        hidden:是否隐藏列
         total_string:汇总行字符串
         total_function:汇总行函数，支持:sum,count,avg
         formula:公式，示例： formula='[ColumnA]/[ColumnB]'
     """
     kw["header"] = header
-    if width:
-        kw["width"] = width
     if format:
         kw["format"] = format
     return kw
 
-
-Account = partial(Header, width=25)
-AcName = partial(Header, width=52)
-Date = partial(Header, width=14)
-Balance = partial(Header, width=18, format="currency")
 
 # 样式属性的别名
 sytle_alias = {
@@ -158,24 +145,32 @@ class Sheet(Worksheet):
             header = header.split(",")
         self.addRow(col, header, "Header")
 
-    def addTable(self, start_col: str, data: Iterable[Any], **kwargs):
+    def addTable(
+        self,
+        start_col: str,
+        data: Iterable[Any],
+        header: Optional[str] = None,
+        column: Optional[List[Dict]] = None,
+        columns: Optional[List[Dict]] = None,
+        **kwargs,
+    ):
         "添加表格"
         first_row, first_col = self.cur_row, colname_to_col(start_col)
         total_row = False
-        columns = kwargs.get("columns")
-        if not columns and "header" in kwargs:
-            columns = [Header(header) for header in kwargs.pop("header").split(",")]
+        columns = columns or column
+        if not columns and header:
+            columns = [Header(h) for h in header.split(",")]
         if not columns:
             raise Exception("添加表格，必须包含 header 或 columns ")
         for i in range(len(columns)):
-            column = columns[i]
-            if "name" in column:
-                column["header"] = column.pop("name")
-            if "header_format" not in column:
-                column["header_format"] = "Header"
+            col = columns[i]
+            if "name" in col:
+                col["header"] = col.pop("name")
+            if "header_format" not in col:
+                col["header_format"] = "Header"
             for fmt in ("format", "header_format", "total_format"):
-                if fmt in column:
-                    column[fmt] = self.get_format(column[fmt])
+                if fmt in col:
+                    col[fmt] = self.get_format(col[fmt])
             if not total_row or any(
                 t in columns for t in ("total_string", "total_function")
             ):
@@ -198,12 +193,10 @@ class Book(Workbook):
 
     def __init__(
         self,
-        filename: Union[Path, str, None] = None,
+        filename: Optional[str] = None,
         formats: Optional[dict] = {},
         **kw,
     ):
-        if isinstance(filename, (Path, str)):
-            filename = str(Path(filename))
         super().__init__(filename, **kw)
         self._formats: Dict[str, Format] = {}
         if formats:
@@ -253,24 +246,20 @@ class Book(Workbook):
             worksheet.workbook = self
         return worksheet
 
-
-def export_xlsx(db: Connection, table: str, xlsx_file: str):
-    "导出报表到 Excel 文件"
-    book = Book(str(Path(xlsx_file)))
-    x = loads(table)
-    sheet = book.add_sheet(x.pop("sheet"))
-    if widths := x.pop("widths", None):
-        sheet.set_widths(widths)
-    if formats := x.pop("formats", None):
+    def add_table_toml(
+        self,
+        sheet: str,
+        data: Iterable[Any],
+        widths: Dict[str, float] = {},
+        formats: Dict[str, str] = {},
+        hidden: str = "",
+        start_col: str = "A",
+        **kw,
+    ):
+        "添加 toml 描述的表格"
+        st = self.add_sheet(sheet)
+        st.set_widths(widths)
         for col, fmt in formats.items():
-            sheet.set_columns(col, cell_format=fmt)
-    if columns := x.pop("hidden", None):
-        sheet.set_hidden(columns)
-    data = db.fetch(x.pop("query"))
-    start_col = x.pop("start_col", "A")
-    if "column" in x:
-        x["columns"] = x.pop("column")
-    if data:
-        sheet.addTable(start_col=start_col, data=data, **x)
-    book.close()
-    print(f"保存文件：{xlsx_file} 成功")
+            st.set_columns(col, cell_format=fmt)
+        st.set_hidden(hidden)
+        st.addTable(start_col, data=data, **kw)

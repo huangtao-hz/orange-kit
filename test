@@ -46,7 +46,7 @@ where tcrq=(select max(tcrq)from ystmb)
 group by jsxz
 order by sl desc\
 """
-start_col = "A"
+
 name = "开发情况统计表"
 
 [widths]

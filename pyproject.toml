@@ -32,3 +32,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
 version = { attr = "orange.__version__.version" }
+
+[tool.setuptools.package-data]
+orange = ["*.toml"]
+
+[options]
+include_package_data = true
