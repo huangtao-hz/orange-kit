@@ -34,7 +34,7 @@ build-backend = "setuptools.build_meta"
 version = { attr = "orange.__version__.version" }
 
 [tool.setuptools.package-data]
-orange = ["*.toml"]
+orange = ["xlwt/*.toml"]
 
 [options]
 include_package_data = true
