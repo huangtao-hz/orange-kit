@@ -8,7 +8,7 @@
 from contextlib import suppress
 from itertools import chain
 from operator import itemgetter
-from typing import Callable, Iterable, Literal, Optional, Union, List
+from typing import Callable, Iterable, List, Literal, Optional, Union
 
 from xlrd3 import Book, open_workbook, xldate_as_tuple
 

@@ -174,7 +174,7 @@ class Sheet(Worksheet):
             if not total_row:
                 total_row = any(t in col for t in ("total_string", "total_function"))
         kwargs["columns"] = columns
-        last_col = first_col + len(columns)
+        last_col = first_col + len(columns) - 1
         if not isinstance(data, (tuple, list)):
             data = tuple(data)
         last_row = first_row + len(data)
@@ -183,7 +183,7 @@ class Sheet(Worksheet):
             last_row += 1
         kwargs["data"] = data
         super().add_table(first_row, first_col, last_row, last_col, kwargs)
-        self.cur_row = last_row + 2
+        self.cur_row = last_row + 3
 
 
 class Book(Workbook):

@@ -15,7 +15,7 @@ import sqlite3
 from contextlib import closing
 from functools import wraps
 from pkgutil import get_data
-from typing import Callable, Iterable, Optional, Union
+from typing import Callable, Iterable, List, Optional, Union
 
 from toml import loads
 
@@ -106,6 +106,11 @@ class Connection(sqlite3.Connection):
         for row in self.fetch(sql, params):
             print(*row, sep=sep, end=end)
 
+    def get_filedcount(self, tablename: str) -> Optional[int]:
+        r = self.execute(f"select * from {tablename} where 0")
+        if r:
+            return len(r.description)
+
     def printlist(self, sql: str, params: list = []):
         "以列表形式打印查询结果"
         print(*self.fetch(sql, params), sep="\n")
@@ -186,8 +191,8 @@ class Connection(sqlite3.Connection):
     def load(
         self,
         table: str,
-        fields: Union[list, int, str],
-        data: Iterable[list],
+        fields: Union[List, int, str, None],
+        data: Iterable[List],
         method: str = "insert",
         clear: bool = True,
         print_result: bool = False,
@@ -206,6 +211,7 @@ class Connection(sqlite3.Connection):
             method = "insert or replace"
         elif method == "ignore":
             method = "insert or ignore"
+        fields = fields or self.get_filedcount(table)
         if isinstance(fields, int):
             sql = f"{method} into {table} {Values(fields)}"
         elif isinstance(fields, str):
