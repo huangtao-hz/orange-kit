@@ -71,9 +71,9 @@ def proc_data(
 def read_excel(
     io: Union[str, Path, Book, None] = None,  # Excel 文件
     file_contents: Optional[bytes] = None,  # 文件内容
-    sheets: Union[str, int, list, None] = None,  # 工作表名
+    sheets: Union[str, int, List, None] = None,  # 工作表名
     usecols: str = "",  # 选取列
-    converter: Optional[Callable[[list], list]] = None,  # 按行转换程序
+    converter: Optional[Callable[[List], Optional[List]]] = None,  # 按行转换程序
     skiprows: int = 0,  # 跳过行
     nrows: int = 0,  # 读取行数
 ) -> Iterable:
