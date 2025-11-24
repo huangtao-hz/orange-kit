@@ -4,7 +4,6 @@ import sys
 sys.path.insert(0, "src")
 # from orange import Path
 from orange import connect
-from orange.xlwt import export_xlsx
 
 s = '''
 sheet = "分工表"
