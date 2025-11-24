@@ -25,10 +25,10 @@ from xlsxwriter.worksheet import (
 
 def colname_to_col(col_str: str) -> int:
     "将列名转换为坐标"
-    expn, col = 26, 0
+    expn, col = 0, 0
     for char in reversed(col_str):
-        col += (ord(char) - ord("A") + 1) * expn
-        expn *= 26
+        col += (ord(char) - ord("A") + 1) * 26**expn
+        expn += 1
     return col - 1
 
 
@@ -156,27 +156,25 @@ class Sheet(Worksheet):
     ):
         "添加表格"
         first_row, first_col = self.cur_row, colname_to_col(start_col)
-        total_row = False
         columns = columns or column
         if not columns and header:
             columns = [Header(h) for h in header.split(",")]
         if not columns:
             raise Exception("添加表格，必须包含 header 或 columns ")
+        total_row = False
         for i in range(len(columns)):
             col = columns[i]
             if "name" in col:
                 col["header"] = col.pop("name")
             if "header_format" not in col:
                 col["header_format"] = "Header"
-            for fmt in ("format", "header_format", "total_format"):
+            for fmt in ("format", "header_format"):
                 if fmt in col:
                     col[fmt] = self.get_format(col[fmt])
-            if not total_row or any(
-                t in columns for t in ("total_string", "total_function")
-            ):
-                total_row = True
+            if not total_row:
+                total_row = any(t in col for t in ("total_string", "total_function"))
         kwargs["columns"] = columns
-        last_col = first_col + len(columns) - 1
+        last_col = first_col + len(columns)
         if not isinstance(data, (tuple, list)):
             data = tuple(data)
         last_row = first_row + len(data)
@@ -185,7 +183,7 @@ class Sheet(Worksheet):
             last_row += 1
         kwargs["data"] = data
         super().add_table(first_row, first_col, last_row, last_col, kwargs)
-        self.cur_row += last_row + 2
+        self.cur_row = last_row + 2
 
 
 class Book(Workbook):

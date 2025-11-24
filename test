@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, "src")
 # from orange import Path
 from orange import connect
+from orange.xlwt.xlwt import colname_to_col
 
 s = '''
 sheet = "分工表"
@@ -114,3 +115,5 @@ formula = "([待验收]+[完成验收])/[总数]"
 total_function = "([[#Totals],[待验收]]+[[#Totals],[完成验收]])/[[#Totals],[总数]]"
 '''
 db = connect("xgm2025-03")
+
+print(colname_to_col("B"))
