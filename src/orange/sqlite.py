@@ -191,8 +191,8 @@ class Connection(sqlite3.Connection):
     def load(
         self,
         table: str,
-        fields: Union[List, int, str, None],
         data: Iterable[List],
+        fields: Union[List, int, str, None] = None,
         method: str = "insert",
         clear: bool = True,
         print_result: bool = False,
