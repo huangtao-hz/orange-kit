@@ -106,9 +106,8 @@ class Connection(sqlite3.Connection):
         for row in self.fetch(sql, params):
             print(*row, sep=sep, end=end)
 
-    def get_filedcount(self, tablename: str) -> Optional[int]:
-        r = self.execute(f"select * from {tablename} where 0")
-        if r:
+    def get_fieldcount(self, tablename: str) -> Optional[int]:
+        if r := self.execute(f"select * from {tablename} where 0"):
             return len(r.description)
 
     def printlist(self, sql: str, params: list = []):
@@ -211,7 +210,7 @@ class Connection(sqlite3.Connection):
             method = "insert or replace"
         elif method == "ignore":
             method = "insert or ignore"
-        fields = fields or self.get_filedcount(table)
+        fields = fields or self.get_fieldcount(table)
         if isinstance(fields, int):
             sql = f"{method} into {table} {Values(fields)}"
         elif isinstance(fields, str):
