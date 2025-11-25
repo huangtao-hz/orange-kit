@@ -194,6 +194,7 @@ class Connection(sqlite3.Connection):
         fields: Union[List, int, str, None] = None,
         method: str = "insert",
         clear: bool = True,
+        clear_sql: str = "",
         print_result: bool = False,
     ) -> sqlite3.Cursor:
         """
@@ -205,7 +206,8 @@ class Connection(sqlite3.Connection):
         clear:  是否清空数据库表
         """
         if clear:
-            self.execute(f"delete from {table}")
+            clear_sql = clear_sql or f"delete from {table}"
+            self.execute(clear_sql)
         if method == "replace":
             method = "insert or replace"
         elif method == "ignore":
