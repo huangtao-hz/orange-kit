@@ -115,9 +115,5 @@ formula = "([待验收]+[完成验收])/[总数]"
 total_function = "([[#Totals],[待验收]]+[[#Totals],[完成验收]])/[[#Totals],[总数]]"
 '''
 db = connect("xgm2025-03")
-<<<<<<< HEAD
 
 print(colname_to_col("B"))
-=======
-print(db.get_filedcount("xmjh"))
->>>>>>> a5f809b (upgrade)
