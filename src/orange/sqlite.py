@@ -106,6 +106,8 @@ class Connection(sqlite3.Connection):
         for row in self.fetch(sql, params):
             print(*row, sep=sep, end=end)
 
+    fprint = print
+
     def get_fieldcount(self, tablename: str) -> Optional[int]:
         if r := self.execute(f"select * from {tablename} where 0"):
             return len(r.description)
