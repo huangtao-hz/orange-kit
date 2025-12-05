@@ -293,9 +293,11 @@ class Connection(sqlite3.Connection):
         book = Book(str(excel_file))
         for file in files:
             if toml_data := get_data(pkg, file):
-                toml = loads(toml_data.decode())
+                s = "\n".join(toml_data.decode().splitlines())
+                toml = loads(s)
                 if data := self.fetch(toml.pop("query")):
                     book.add_table_toml(data=data, **toml)
+
         book.close()
 
 
