@@ -153,6 +153,8 @@ class Connection(sqlite3.Connection):
         "格式化打印数据"
         tprint(self.fetch(sql, params), format_spec=fmt, print_rows=print_rows)
 
+    fprintf = printf
+
     def lcheck(
         self,
         name: str,
