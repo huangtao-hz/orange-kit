@@ -17,10 +17,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 from toml import loads
 from xlsxwriter import Workbook
-from xlsxwriter.worksheet import (
-    Format,
-    Worksheet,
-)
+from xlsxwriter.worksheet import Format, Worksheet
 
 
 def colname_to_col(col_str: str) -> int:
@@ -114,6 +111,15 @@ class Sheet(Worksheet):
         for columns, fmt in formats.items():
             self.set_columns(columns, cell_format=fmt)
 
+    def add_title(self, start_col: str, count: int, title: str):
+        """新增标题"""
+        row_data = [title, *([None] * (count - 1))]
+        self.write_row(
+            self.cur_row, colname_to_col(start_col), row_data, self.get_format("Title")
+        )
+        self.set_row(self.cur_row, height=30)
+        self.cur_row += 1
+
     def set_hidden(self, columns: str):
         "设置隐藏列"
         options = {"hidden": True}
@@ -152,6 +158,7 @@ class Sheet(Worksheet):
         header: Optional[str] = None,
         column: Optional[List[Dict]] = None,
         columns: Optional[List[Dict]] = None,
+        title: Optional[str] = None,
         **kwargs,
     ):
         "添加表格"
@@ -161,6 +168,9 @@ class Sheet(Worksheet):
             columns = [Header(h) for h in header.split(",")]
         if not columns:
             raise Exception("添加表格，必须包含 header 或 columns ")
+        if title:
+            self.add_title(start_col, len(columns), title)
+            first_row += 1
         total_row = False
         for i in range(len(columns)):
             col = columns[i]
@@ -213,6 +223,8 @@ class Book(Workbook):
         num_format = properties.get("num_format", None)
         if num_format:
             properties["num_format"] = num_formats.get(num_format, num_format)
+        if properties.get("align") == "centerContinuous":
+            properties["align"] = "center_across"
         if "valign" in properties and properties["valign"] not in ("top", "bottom"):
             properties["valign"] = f"v{properties['valign']}"
         _format = super().add_format(properties)
@@ -251,7 +263,6 @@ class Book(Workbook):
         widths: Dict[str, float] = {},
         formats: Dict[str, str] = {},
         hidden: str = "",
-        title: str = "",
         start_col: str = "A",
         **kw,
     ):
