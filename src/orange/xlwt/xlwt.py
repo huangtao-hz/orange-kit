@@ -251,6 +251,7 @@ class Book(Workbook):
         widths: Dict[str, float] = {},
         formats: Dict[str, str] = {},
         hidden: str = "",
+        title: str = "",
         start_col: str = "A",
         **kw,
     ):
