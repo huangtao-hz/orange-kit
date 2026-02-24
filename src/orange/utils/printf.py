@@ -63,10 +63,19 @@ def format(
 
 def printf(fmt: str, *args):
     """
-    打造一个兼容 golang 的 printf 函数，支持以下类型：
-    整数： %d   %5d   %5,d
-    字符串： %s  %-s
-    浮点数： %5.2f
+    打造一个兼容 golang 的 printf 函数，其中每个值支持：
+    %[flags][width][.precision]verb
+    flags：用于控制格式化输出的标志（可选）。
+        -：左对齐。
+        +：始终显示数值的符号。
+        0：用零填充。
+        空格：正数前加空格，负数前加 -。
+    width：输出宽度（可选）。
+    .precision：浮点数小数点后的位数（可选）。
+    verb:
+        %s:字符串
+        %d:整数十进制数字
+        %f:浮点数
     """
     i = 0
 
