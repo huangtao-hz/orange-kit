@@ -14,7 +14,7 @@ import warnings
 from functools import wraps
 from hashlib import md5
 from itertools import islice
-from typing import Iterable
+from typing import Iterable, Any, Optional
 
 from .datetime_ import datetime
 from .regex import R
@@ -53,11 +53,14 @@ def timeit(func):
     return _
 
 
-def first(iterable):
+def first(iterable: Iterable) -> Optional[Any]:
+    "返回可迭代对象的第一个值"
     return next(iter(iterable))
 
 
-def last(iterable):
+def last(iterable: Iterable) -> Optional[Any]:
+    "返回可迭代对象的最后一个值"
+    item = None
     for item in iterable:
         pass
     return item
@@ -84,8 +87,7 @@ def deprecate(func):
         @wraps(fn)
         def new_func(*args, **kw):
             warnings.warn(
-                "%s will be deprecated, Please use %s replaced!"
-                % (fn.__name__, func),
+                "%s will be deprecated, Please use %s replaced!" % (fn.__name__, func),
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -111,9 +113,7 @@ def cformat(value, format_spec=""):
     """对字符串进行格式化，
     解决设定宽度后，汉字无法对齐的问题"""
     if isinstance(value, str) and _Digit / format_spec:
-        d = int(tuple(_Digit / format_spec)[0]) - sum(
-            1 for x in value if ord(x) > 127
-        )
+        d = int(tuple(_Digit / format_spec)[0]) - sum(1 for x in value if ord(x) > 127)
         format_spec = _Digit / format_spec % str(d)
     return format(value, format_spec)
 
@@ -157,9 +157,7 @@ def tprint(data, format_spec={}, sep=" ", print_rows: bool = True):
             print(x)
     elif isinstance(format_spec, dict):
         for row in data:
-            x = sep.join(
-                cformat(k, format_spec.get(i, "")) for i, k in enumerate(row)
-            )
+            x = sep.join(cformat(k, format_spec.get(i, "")) for i, k in enumerate(row))
             count += 1
             print(x)
     elif isinstance(format_spec, str):
