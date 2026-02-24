@@ -5,7 +5,7 @@
 #
 import re
 from typing import Any, Optional
-from .htutil import wlen
+from orange.utils.htutil import wlen
 
 Pattern = re.compile(
     r"%(?P<flags>[+-0 ]?)((?P<width>\d+)(?P<thousands>,)?)?(\.(?P<precision>\d+))?(?P<type>[sdf%])"
