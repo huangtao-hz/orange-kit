@@ -56,3 +56,7 @@ from .log import (
     warning,
 )
 from .regex import R, convert_cls_name, extract
+
+from .printf import printf
+
+__all__ = ["printf", "arg", "command", "R", "convert_cls_name", "extract"]
