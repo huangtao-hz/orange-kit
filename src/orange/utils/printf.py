@@ -1,8 +1,8 @@
 # 项目：自用函数库
-# 模块：格式化打印函数，仿照
+# 模块：格式化打印函数，仿照 golang 的 Printf 函数
 # 作者：黄涛
-# 修订：2019-09-03 10:05 增加
-#
+# 新建：2026-02-24 10:05
+
 import re
 from typing import Any, Optional
 from orange.utils.htutil import wlen
