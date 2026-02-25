@@ -132,7 +132,7 @@ class Sheet(Worksheet):
             cell_format = self.workbook.get_format(cell_format)
         return cell_format
 
-    def addRow(
+    def add_row(
         self,
         col: str,
         row_data: Iterable[Any],
@@ -145,15 +145,15 @@ class Sheet(Worksheet):
         )
         self.cur_row += 1
 
-    add_row = addRow
+    addRow = add_row
 
-    def addHeader(self, col: str, header: Union[Iterable[str], str]):
+    def add_header(self, col: str, header: Union[Iterable[str], str]):
         "添加一个小标题"
         if isinstance(header, str):
             header = header.split(",")
         self.addRow(col, header, "Header")
 
-    add_header = addHeader
+    addHeader = add_header
 
     def addTable(
         self,
@@ -201,17 +201,18 @@ class Sheet(Worksheet):
 
     def set_border(
         self,
-        first_row,
-        first_col,
-        last_row,
-        last_col,
-        left=None,
-        right=None,
-        bottom=None,
-        top=None,
-        border=2,
-        inner=1,
+        first_row: int,
+        first_col: int,
+        last_row: int,
+        last_col: int,
+        left: Optional[int] = None,
+        right: Optional[int] = None,
+        bottom: Optional[int] = None,
+        top: Optional[int] = None,
+        border: int = 2,
+        inner: int = 1,
     ):
+        "设置边框"
         self._check_dimensions(first_row, first_col)
         self._check_dimensions(last_row, last_col)
         if border:
