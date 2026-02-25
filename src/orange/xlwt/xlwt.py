@@ -17,7 +17,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 from toml import loads
 from xlsxwriter import Workbook
-from xlsxwriter.worksheet import Format, Worksheet
+from xlsxwriter.worksheet import CellBlankTuple, Format, Worksheet
 
 
 def colname_to_col(col_str: str) -> int:
@@ -145,11 +145,15 @@ class Sheet(Worksheet):
         )
         self.cur_row += 1
 
+    add_row = addRow
+
     def addHeader(self, col: str, header: Union[Iterable[str], str]):
         "添加一个小标题"
         if isinstance(header, str):
             header = header.split(",")
         self.addRow(col, header, "Header")
+
+    add_header = addHeader
 
     def addTable(
         self,
@@ -194,6 +198,55 @@ class Sheet(Worksheet):
         kwargs["data"] = data
         super().add_table(first_row, first_col, last_row, last_col, kwargs)
         self.cur_row = last_row + 3
+
+    def set_border(
+        self,
+        first_row,
+        first_col,
+        last_row,
+        last_col,
+        left=None,
+        right=None,
+        bottom=None,
+        top=None,
+        border=2,
+        inner=1,
+    ):
+        self._check_dimensions(first_row, first_col)
+        self._check_dimensions(last_row, last_col)
+        if border:
+            left = left or border
+            right = right or border
+            bottom = bottom or border
+            top = top or border
+        table = self.table
+
+        def _replace(r, c, **kw):
+            assert self.workbook is not None
+            row = table[r]
+            cell = row.get(c, CellBlankTuple(None))
+            fmt = cell.format
+            kw["top"] = top if r == first_row else inner
+            kw["bottom"] = bottom if r == last_row else inner
+            kw["left"] = left if c == first_col else inner
+            kw["right"] = right if c == last_col else inner
+            name = "".join([str(kw[name]) for name in "left top right bottom".split()])
+            if fmt and hasattr(fmt, "name"):
+                name = name + "-" + fmt.name
+            if name not in self.workbook._formats:
+                if fmt and hasattr(fmt, "properties"):
+                    a = fmt.properties.copy()
+                    a.update(kw)
+                else:
+                    a = kw
+                new_fmt = self.workbook.add_named_format(a, name)
+            else:
+                new_fmt = self.workbook._formats.get(name)
+            row[c] = cell._replace(format=new_fmt)
+
+        for r in range(first_row, last_row + 1):
+            for c in range(first_col, last_col + 1):
+                _replace(r, c)
 
 
 class Book(Workbook):
@@ -255,6 +308,8 @@ class Book(Workbook):
             assert isinstance(worksheet, Sheet)
             worksheet.workbook = self
         return worksheet
+
+    get_sheet = add_sheet
 
     def add_table_toml(
         self,
