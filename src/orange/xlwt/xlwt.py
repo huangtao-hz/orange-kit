@@ -281,8 +281,9 @@ class Book(Workbook):
             properties["valign"] = f"v{properties['valign']}"
         _format = super().add_format(properties)
         if name:
-            self._formats[name] = _format
             _format.name = name
+            _format.properties = properties
+            self._formats[name] = _format
         return _format
 
     def add_formats(self, properties):
