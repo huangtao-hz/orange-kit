@@ -15,7 +15,7 @@ import sqlite3
 from contextlib import closing
 from functools import wraps
 from pkgutil import get_data
-from typing import Callable, Iterable, List, Optional, Union
+from typing import Callable, Iterable, List, Optional, Tuple, Union
 
 from toml import loads
 
@@ -24,22 +24,22 @@ from orange.utils.datetime_ import datetime
 from orange.utils.htutil import tprint, wlen
 
 
-def Values(count):
+def Values(count: int) -> str:
     """提供 sql 语句的占符  用法： f"insert into test(a,b,c) {Values(3)}" """
     return f"VALUES({','.join('?' * count)})"
 
 
 def fix_db_name(database: Union[str, Path]) -> str:
     """修复数据库文件名"""
-    ROOT = Path("~/.data")
-    ROOT.ensure()
-    file = str(database)
-    if not file.startswith(":"):
-        db = Path(database)
-        if not db.root:
-            db = ROOT / db
-        file = str(db.with_suffix(".db"))
-    return file
+    if isinstance(database, str) and database == ":memory:":
+        return database
+    Root = Path("~/.data")
+    Root.ensure()
+    db = Path(database)
+    if not db.root:
+        db = Root / db
+    db = db.with_suffix(".db")
+    return str(db)
 
 
 class LoadError(Exception):
@@ -52,7 +52,7 @@ class LoadError(Exception):
 
 class Connection(sqlite3.Connection):
     def __init__(self, database: Union[str, Path], **kw):
-        database = str(fix_db_name(database))
+        database = fix_db_name(database)
         super().__init__(database, **kw)
 
     def executefile(self, pkg: str, filename: str):
@@ -61,11 +61,11 @@ class Connection(sqlite3.Connection):
         pkg         : 所在包的名称
         filename    : 相关于包的文件名，包括路径
         """
-        from pkgutil import get_data
-
         data = get_data(pkg, filename)
         if data:
-            return self.executescript(data.decode())
+            self.executescript(data.decode())
+        else:
+            raise FileNotFoundError(f"{pkg}:{filename}")
 
     def fetch(self, sql: str, params: list = [], multi=True):
         "执行一条 sql 语句，并取出所以查询结果"
