@@ -15,7 +15,7 @@ import sqlite3
 from contextlib import closing
 from functools import wraps
 from pkgutil import get_data
-from typing import Callable, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
 from toml import loads
 
@@ -67,11 +67,11 @@ class Connection(sqlite3.Connection):
         else:
             raise FileNotFoundError(f"{pkg}:{filename}")
 
-    def fetch(self, sql: str, params: list = [], multi=True):
+    def fetch(self, sql: str, params: list = []) -> List[Tuple]:
         "执行一条 sql 语句，并取出所以查询结果"
         cur = self.execute(sql, params)
         with closing(cur):
-            return cur.fetchall() if multi else cur.fetchone()
+            return cur.fetchall()
 
     def export(
         self, path: Union[str, Path], querysql: str, params: list = [], **kwargs
@@ -83,11 +83,13 @@ class Connection(sqlite3.Connection):
             with write_excel(path) as book:
                 book.add_table(data=data, **kwargs)
 
-    def fetchone(self, sql: str, params: list = []):
+    def fetchone(self, sql: str, params: list = []) -> Tuple:
         "执行一条 sql 语句， 并取出第一条记录"
-        return self.fetch(sql, params, multi=False)
+        cur = self.execute(sql, params)
+        with closing(cur):
+            return cur.fetchone()
 
-    def fetchvalue(self, sql: str, params: list = []):
+    def fetchvalue(self, sql: str, params: list = []) -> Optional[Any]:
         "执行一条 sql 语句，并取出第一行第一列的值"
         row = self.fetchone(sql, params)
         return row and row[0]
@@ -103,8 +105,9 @@ class Connection(sqlite3.Connection):
 
     def print(self, sql: str, params: list = [], sep=" ", end="\n"):
         "打印查询结果"
-        for row in self.fetch(sql, params):
-            print(*row, sep=sep, end=end)
+        with closing(self.execute(sql, params)) as cur:
+            for row in cur:
+                print(*row, sep=sep, end=end)
 
     fprint = print
 
