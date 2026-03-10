@@ -33,10 +33,10 @@ def fix_db_name(database: Union[str, Path]) -> str:
     """修复数据库文件名"""
     if isinstance(database, str) and database == ":memory:":
         return database
-    Root = Path("~/.data")
-    Root.ensure()
     db = Path(database)
     if not db.root:
+        Root = Path("~/.data")
+        Root.ensure()
         db = Root / db
     db = db.with_suffix(".db")
     return str(db)
