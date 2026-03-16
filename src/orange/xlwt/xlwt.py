@@ -267,7 +267,7 @@ class Book(Workbook):
         "根据名称获取样式"
         return self._formats.get(name, None)
 
-    def add_named_format(self, properties, name=None):
+    def add_named_format(self, properties: Dict[str, Any], name: Optional[str] = None):
         "添加带名字的样式"
         for k, v in sytle_alias.items():
             if k in properties:
@@ -277,8 +277,8 @@ class Book(Workbook):
             properties["num_format"] = num_formats.get(num_format, num_format)
         if properties.get("align") == "centerContinuous":
             properties["align"] = "center_across"
-        if "valign" in properties and properties["valign"] not in ("top", "bottom"):
-            properties["valign"] = f"v{properties['valign']}"
+        if "valign" in properties and properties["valign"] == "center":
+            properties["valign"] = "vcenter"
         _format = super().add_format(properties)
         if name:
             _format.name = name
