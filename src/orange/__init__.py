@@ -38,6 +38,7 @@ from orange.utils import (
     info,
     last,
     now,
+    suppress,
     today,
     warning,
 )
@@ -119,6 +120,7 @@ __all__ = (
     "extract",
     "cstr",
     "deprecate",
+    "suppress",
     "tprint",
     "shell",
     "POSIX",
