@@ -15,7 +15,7 @@ import sqlite3
 from contextlib import closing
 from functools import wraps
 from pkgutil import get_data
-from typing import Callable, Iterable, List, Optional, Union
+from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
 from toml import loads
 
@@ -24,22 +24,22 @@ from orange.utils.datetime_ import datetime
 from orange.utils.htutil import tprint, wlen
 
 
-def Values(count):
+def Values(count: int) -> str:
     """提供 sql 语句的占符  用法： f"insert into test(a,b,c) {Values(3)}" """
     return f"VALUES({','.join('?' * count)})"
 
 
 def fix_db_name(database: Union[str, Path]) -> str:
     """修复数据库文件名"""
-    ROOT = Path("~/.data")
-    ROOT.ensure()
-    file = str(database)
-    if not file.startswith(":"):
-        db = Path(database)
-        if not db.root:
-            db = ROOT / db
-        file = str(db.with_suffix(".db"))
-    return file
+    if isinstance(database, str) and database == ":memory:":
+        return database
+    db = Path(database)
+    if not db.root:
+        Root = Path("~/.data")
+        Root.ensure()
+        db = Root / db
+    db = db.with_suffix(".db")
+    return str(db)
 
 
 class LoadError(Exception):
@@ -52,7 +52,7 @@ class LoadError(Exception):
 
 class Connection(sqlite3.Connection):
     def __init__(self, database: Union[str, Path], **kw):
-        database = str(fix_db_name(database))
+        database = fix_db_name(database)
         super().__init__(database, **kw)
 
     def executefile(self, pkg: str, filename: str):
@@ -61,17 +61,17 @@ class Connection(sqlite3.Connection):
         pkg         : 所在包的名称
         filename    : 相关于包的文件名，包括路径
         """
-        from pkgutil import get_data
-
         data = get_data(pkg, filename)
         if data:
-            return self.executescript(data.decode())
+            self.executescript(data.decode())
+        else:
+            raise FileNotFoundError(f"{pkg}:{filename}")
 
-    def fetch(self, sql: str, params: list = [], multi=True):
+    def fetch(self, sql: str, params: list = []) -> List[Tuple]:
         "执行一条 sql 语句，并取出所以查询结果"
         cur = self.execute(sql, params)
         with closing(cur):
-            return cur.fetchall() if multi else cur.fetchone()
+            return cur.fetchall()
 
     def export(
         self, path: Union[str, Path], querysql: str, params: list = [], **kwargs
@@ -83,11 +83,13 @@ class Connection(sqlite3.Connection):
             with write_excel(path) as book:
                 book.add_table(data=data, **kwargs)
 
-    def fetchone(self, sql: str, params: list = []):
+    def fetchone(self, sql: str, params: list = []) -> Tuple:
         "执行一条 sql 语句， 并取出第一条记录"
-        return self.fetch(sql, params, multi=False)
+        cur = self.execute(sql, params)
+        with closing(cur):
+            return cur.fetchone()
 
-    def fetchvalue(self, sql: str, params: list = []):
+    def fetchvalue(self, sql: str, params: list = []) -> Optional[Any]:
         "执行一条 sql 语句，并取出第一行第一列的值"
         row = self.fetchone(sql, params)
         return row and row[0]
@@ -103,8 +105,9 @@ class Connection(sqlite3.Connection):
 
     def print(self, sql: str, params: list = [], sep=" ", end="\n"):
         "打印查询结果"
-        for row in self.fetch(sql, params):
-            print(*row, sep=sep, end=end)
+        with closing(self.execute(sql, params)) as cur:
+            for row in cur:
+                print(*row, sep=sep, end=end)
 
     fprint = print
 

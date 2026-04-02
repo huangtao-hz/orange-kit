@@ -6,6 +6,7 @@ authors = [{ name = "huangtao", email = "huangtao.sh@icloud.com" }]
 dependencies = [
   "beautifulsoup4",
   "lxml",
+  "packaging",
   "pypinyin",
   "python-docx>=1.1.2",
   "requests",

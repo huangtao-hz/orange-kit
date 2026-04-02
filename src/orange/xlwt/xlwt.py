@@ -213,6 +213,7 @@ class Sheet(Worksheet):
         inner: int = 1,
     ):
         "设置边框"
+        assert self.workbook is not None
         self._check_dimensions(first_row, first_col)
         self._check_dimensions(last_row, last_col)
         if border:
@@ -221,33 +222,31 @@ class Sheet(Worksheet):
             bottom = bottom or border
             top = top or border
         table = self.table
-
-        def _replace(r, c, **kw):
-            assert self.workbook is not None
-            row = table[r]
-            cell = row.get(c, CellBlankTuple(None))
-            fmt = cell.format
-            kw["top"] = top if r == first_row else inner
-            kw["bottom"] = bottom if r == last_row else inner
-            kw["left"] = left if c == first_col else inner
-            kw["right"] = right if c == last_col else inner
-            name = "".join([str(kw[name]) for name in "left top right bottom".split()])
-            if fmt and hasattr(fmt, "name"):
-                name = name + "-" + fmt.name
-            if name not in self.workbook._formats:
-                if fmt and hasattr(fmt, "properties"):
-                    a = fmt.properties.copy()
-                    a.update(kw)
-                else:
-                    a = kw
-                new_fmt = self.workbook.add_named_format(a, name)
-            else:
-                new_fmt = self.workbook._formats.get(name)
-            row[c] = cell._replace(format=new_fmt)
-
         for r in range(first_row, last_row + 1):
             for c in range(first_col, last_col + 1):
-                _replace(r, c)
+                kw = dict()
+                row = table[r]
+                cell = row.get(c, CellBlankTuple(None))
+                fmt = cell.format
+                kw["top"] = top if r == first_row else inner
+                kw["bottom"] = bottom if r == last_row else inner
+                kw["left"] = left if c == first_col else inner
+                kw["right"] = right if c == last_col else inner
+                name = "".join(
+                    [str(kw[name]) for name in "left top right bottom".split()]
+                )
+                if fmt and hasattr(fmt, "name"):
+                    name = name + "-" + fmt.name
+                if name not in self.workbook._formats:
+                    if fmt and hasattr(fmt, "properties"):
+                        a = fmt.properties.copy()
+                        a.update(kw)
+                    else:
+                        a = kw
+                    new_fmt = self.workbook.add_named_format(a, name)
+                else:
+                    new_fmt = self.workbook._formats.get(name)
+                row[c] = cell._replace(format=new_fmt)
 
 
 class Book(Workbook):
@@ -269,7 +268,7 @@ class Book(Workbook):
         "根据名称获取样式"
         return self._formats.get(name, None)
 
-    def add_named_format(self, properties, name=None):
+    def add_named_format(self, properties: Dict[str, Any], name: Optional[str] = None):
         "添加带名字的样式"
         for k, v in sytle_alias.items():
             if k in properties:
@@ -279,10 +278,12 @@ class Book(Workbook):
             properties["num_format"] = num_formats.get(num_format, num_format)
         if properties.get("align") == "centerContinuous":
             properties["align"] = "center_across"
-        if "valign" in properties and properties["valign"] not in ("top", "bottom"):
-            properties["valign"] = f"v{properties['valign']}"
+        if "valign" in properties and properties["valign"] == "center":
+            properties["valign"] = "vcenter"
         _format = super().add_format(properties)
         if name:
+            _format.name = name
+            _format.properties = properties
             self._formats[name] = _format
         return _format
 
