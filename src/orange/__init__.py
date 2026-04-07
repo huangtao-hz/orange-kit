@@ -38,6 +38,7 @@ from orange.utils import (
     info,
     last,
     now,
+    slicer,
     suppress,
     today,
     warning,
@@ -132,4 +133,5 @@ __all__ = (
     "fatal",
     "today",
     "get_id",
+    "slicer",
 )
