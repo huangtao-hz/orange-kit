@@ -31,11 +31,11 @@ sql = "orange.pykit.sql:execsql"
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.dynamic]
 version = { attr = "orange.__version__.version" }
 
 [tool.setuptools.package-data]
 orange = ["xlwt/*.toml"]
-
-[options]
-include_package_data = true
