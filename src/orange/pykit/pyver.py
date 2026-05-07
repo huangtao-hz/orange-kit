@@ -8,7 +8,7 @@
 # 修订：2016-9-6 将其迁移至orange 库，并移除对stdlib 的依赖
 # 修订：2017-2-10 pyver 增加 -y 功能，与远程服务器同步
 
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 from packaging.version import Version
 
@@ -67,7 +67,7 @@ def upgrade(ver: Version, segment: Union[int, str] = 4):
     return Version(new_ver)
 
 
-def get_pkg_ver() -> tuple[Path, str] | None:
+def get_pkg_ver() -> Tuple[Path, str] | None:
     "获取当前包的版本文件及版本"
     ver_file = Path(".").find("__version__.py")
     # or Path('.').find('pyproject.toml')
@@ -93,9 +93,9 @@ class VersionMgr:
         from re import compile
 
         patterns = {
-            compile(
-                r"(On branch|位于分支) (?P<branch>\w+)"
-            ): lambda branch: setattr(self, "branch", branch),
+            compile(r"(On branch|位于分支) (?P<branch>\w+)"): lambda branch: setattr(
+                self, "branch", branch
+            ),
             compile(
                 r"(Your branch is up-to-date with|您的分支与上游分支) '.*?'."
             ): lambda: setattr(self, "up_to_date", True),
@@ -105,15 +105,15 @@ class VersionMgr:
             compile(r"(Untracked files:|未跟踪的文件:)"): lambda: setattr(
                 self, "file_type", "untracted_files"
             ),
-            compile(
-                r"(Changes to be committed:|要提交的变更：)"
-            ): lambda: setattr(self, "file_type", "to_be_commited"),
+            compile(r"(Changes to be committed:|要提交的变更：)"): lambda: setattr(
+                self, "file_type", "to_be_commited"
+            ),
             compile(r"\t(.*?:\s*)?(?P<file>.*)"): lambda file: getattr(
                 self, self.file_type
             ).append(file),
-            compile(
-                r"(nothing to commit|无文件要提交，干净的工作区)"
-            ): lambda: setattr(self, "is_clean", True),
+            compile(r"(nothing to commit|无文件要提交，干净的工作区)"): lambda: setattr(
+                self, "is_clean", True
+            ),
         }
 
         out = sh("git status")[1]  # 读取git状态
@@ -159,10 +159,7 @@ class VersionMgr:
                 raise Exception("错误：当前版本为最终版")
             if self.untracted_files:
                 print("下面的文件没有被纳入git监控:")
-                [
-                    print("\t%s" % (file_name))
-                    for file_name in self.untracted_files
-                ]
+                [print("\t%s" % (file_name)) for file_name in self.untracted_files]
                 cmd = None
                 while cmd not in ("a", "A", "y", "Y", "n", "N"):
                     cmd = input("请选择： Y-全部跟踪,N-全部不跟踪,A-放弃操作：")
