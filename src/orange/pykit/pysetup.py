@@ -8,7 +8,7 @@
 # 修改：2023-12-03 09:15 不允许直接调用 setup.py 处理
 
 
-from typing import Optional
+from typing import List, Optional
 
 from orange.shell import POSIX, Path, shell
 from orange.utils.click import arg, command
@@ -96,7 +96,7 @@ def pydownload(*pkgs, source=True):
 @arg("-b", "--binary", action="store_true", help="下载二进制程序包")
 def pyinstall(
     path: str,
-    packages: Optional[list] = None,
+    packages: Optional[List] = None,
     download: Optional[str] = None,
     upgrade=False,
     binary=False,

@@ -5,10 +5,10 @@
 # 修订：2019-09-03 10:05 增加
 
 from itertools import cycle
-from typing import Iterable
+from typing import Iterable, List
 
 
-def checksum(s: Iterable, calc, Key: Iterable, Sum: list | str) -> str:
+def checksum(s: Iterable, calc, Key: Iterable, Sum: List | str) -> str:
     "计算校验位"
     return Sum[sum(calc(c, k) for c, k in zip(s, Key)) % len(Sum)]
 

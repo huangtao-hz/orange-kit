@@ -27,7 +27,7 @@ import sys
 from codecs import BOM_BE, BOM_LE, BOM_UTF8
 from contextlib import suppress
 from tempfile import TemporaryDirectory
-from typing import Iterable, Optional, Union
+from typing import Iterable, List, Optional, Union
 from urllib.parse import unquote_plus
 
 from packaging.version import Version
@@ -521,7 +521,7 @@ class Path(_Parent):
     def read_sheet(
         self,
         *args,
-        sheet: Union[str, int, list, None] = None,
+        sheet: Union[str, int, List, None] = None,
         start_row: int = 0,
         **kwargs,
     ) -> Iterable:

@@ -16,7 +16,7 @@ from typing import Callable, Iterable, Iterator, List
 from .htutil import get_md5, limit, split, tprint
 
 
-def convdata(data: Iterable, convfunc: Callable[[list], list]) -> Iterable:
+def convdata(data: Iterable, convfunc: Callable[[List], List]) -> Iterable:
     """数据转换函数，"""
     yield from filter(None, map(convfunc, data))
 
