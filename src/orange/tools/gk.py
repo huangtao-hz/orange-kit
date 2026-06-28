@@ -1,3 +1,9 @@
+# 项目：   工具箱
+# 模块：   国库答题程序
+# 作者：   黄涛
+# License: GPL
+# Email:   huangtao.sh@icloud.com
+# 创建：2019-02-23 21:08
 from typing import List, Optional
 
 from orange import Path, arg, connect
@@ -24,7 +30,7 @@ def load():
     path = Path("~/Downloads").find("*“国库知识”答题题库*")
     if path:
         data = read_excel(path, sheets=0, usecols="A:I", skiprows=5)
-        db.load("gktk", data, fields=9, clear=True, print_result=True)
+        db.load("gktk", data, clear=True, print_result=True)
 
 
 @arg("-l", "--load", action="store_true", help="导入数据")
